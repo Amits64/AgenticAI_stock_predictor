@@ -1,11 +1,7 @@
-import base64
-import io
+from flask import Flask, request, jsonify, render_template
 from datetime import datetime, timedelta
 import numpy as np
-from flask import Flask, request, jsonify, send_file, send_from_directory, render_template
-import os
 import pandas as pd
-from matplotlib import pyplot as plt
 from config import Config
 from data_fetcher import fetch_historical_data
 from technical_analysis import add_technical_indicators
@@ -98,7 +94,6 @@ def risk():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route('/generate_report', methods=['GET'])
 def generate_report_route():
     symbol = request.args.get('symbol', '')
@@ -139,7 +134,6 @@ def generate_report_route():
     else:
         app.logger.error("No symbol provided")
         return jsonify({"error": "No symbol provided"}), 400
-
 
 if __name__ == '__main__':
     app.run(debug=True)
