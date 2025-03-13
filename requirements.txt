@@ -1,0 +1,14 @@
+Flask==2.1.2
+yfinance==0.2.18
+pandas==1.5.3
+numpy==1.23.5
+pandas_ta==0.3.14b0
+matplotlib==3.6.3
+mplfinance==0.12.9b0
+scikit-learn==1.5.0
+tensorflow==2.12.1
+xgboost==1.7.5
+Werkzeug==2.2.2
+requests~=2.32.3
+plotly~=6.0.0
+joblib~=1.4.2

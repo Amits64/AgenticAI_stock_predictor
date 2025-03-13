@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic AI Crypto Coins Price Predictor</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <style>
+    /* Global Styles */
+    body {
+      background: linear-gradient(45deg, #00bcd4, #2575fc);
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.8) !important;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+    }
+    .navbar-brand {
+      font-size: 30px;
+      font-weight: 600;
+      color: #fff !important;
+    }
+    .navbar-nav .nav-link {
+      font-size: 18px;
+      padding: 10px 20px;
+      color: #fff !important;
+    }
+    .navbar-nav .nav-link:hover {
+      color: #00bcd4 !important;
+      transition: 0.3s;
+    }
+    .container {
+      max-width: 1200px;
+      margin-top: 80px;
+    }
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      margin-top: 30px;
+      background-color: #ffffff;
+      color: #333;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card-body {
+      padding: 30px;
+    }
+    .form-group label {
+      font-weight: 600;
+      color: #333;
+    }
+    .form-control {
+      border-radius: 25px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border: 1px solid #ccc;
+    }
+    .form-control:focus {
+      border-color: #00bcd4;
+      box-shadow: 0 0 10px rgba(0, 188, 212, 0.7);
+    }
+    .btn-group button {
+      font-weight: 600;
+      border-radius: 25px;
+      padding: 15px 30px;
+      font-size: 18px;
+      margin-right: 15px;
+      transition: 0.3s ease;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .btn-group button:hover {
+      transform: scale(1.05);
+      background-color: #00bcd4;
+      border-color: #00bcd4;
+      color: #fff;
+    }
+    .progress {
+      height: 25px;
+      border-radius: 10px;
+      background-color: #e0e0e0;
+    }
+    .progress-bar {
+      line-height: 25px;
+    }
+    .results-container {
+      max-height: 400px;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 30px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .footer {
+      background-color: #282c34;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      margin-top: 50px;
+      border-radius: 10px;
+    }
+    .section-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #00bcd4;
+      margin-bottom: 20px;
+    }
+    .btn {
+      transition: 0.3s;
+    }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #00bcd4;
+      animation: spin 1s infinite linear;
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    /* Modal Styling */
+    .modal-content {
+      background-color: #333;
+      color: #fff;
+      border-radius: 15px;
+    }
+    .modal-header {
+      border-bottom: 1px solid #444;
+    }
+    .modal-footer {
+      border-top: 1px solid #444;
+    }
+    .modal-footer .btn {
+      background-color: #00bcd4;
+      border-color: #00bcd4;
+    }
+    .modal-footer .btn:hover {
+      background-color: #0097a7;
+      border-color: #0097a7;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Agentic AI</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1 class="text-center text-light">Agentic AI Crypto Coins Price Predictor</h1>
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="form-group">
+              <label for="symbol">Symbol:</label>
+              <input type="text" id="symbol" class="form-control" placeholder="Enter name of coin (e.g., bitcoin)">
+            </div>
+            <div class="btn-group" role="group" aria-label="Basic example">
+              <button class="btn btn-primary" onclick="fetchData()">Fetch Data</button>
+              <button class="btn btn-secondary" onclick="technicalAnalysis()">Technical Analysis</button>
+              <button class="btn btn-success" onclick="predict()">Predict</button>
+              <button class="btn btn-info" onclick="backtest()">Backtest</button>
+              <button class="btn btn-warning" onclick="riskAnalysis()">Risk Analysis</button>
+              <button class="btn btn-danger" onclick="generateReport()">Generate Report</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="section-title">Progress</h3>
+            <div class="progress">
+              <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                role="progressbar" style="width: 0%;">0%</div>
+            </div>
+            <h3 class="mt-4 section-title">Results</h3>
+            <div class="results-container">
+              <pre id="results" class="bg-light p-3 border"></pre>
+            </div>
+            <h3 class="mt-4 section-title">Backtest Plot</h3>
+            <div id="backtest-plot-container">
+              <p id="backtest-plot">Backtest not performed yet.</p> <!-- Default text -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2025 Agentic AI All Rights Reserved</p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    function updateProgressBar(percentage) {
+      const progressBar = $('#progress-bar');
+      progressBar.css('width', percentage + '%').text(percentage + '%');
+      if (percentage === 100) {
+        progressBar.removeClass('progress-bar-striped progress-bar-animated')
+          .addClass('bg-success');
+      } else {
+        progressBar.removeClass('bg-success')
+          .addClass('progress-bar-striped progress-bar-animated');
+      }
+    }
+
+    // Dummy functions for fetching and handling data
+    function fetchData() {
+      const symbol = $('#symbol').val();
+      if (!symbol) {
+        alert('Please enter a symbol.');
+        return;
+      }
+      updateProgressBar(20);
+      $.get(`/fetch_data?symbol=${symbol}`, function (data) {
+        $('#results').text(JSON.stringify(data, null, 2));
+        updateProgressBar(40);
+      });
+    }
+
+    function technicalAnalysis() {
+      const symbol = $('#symbol').val();
+      if (!symbol) {
+        alert('Please enter a symbol.');
+        return;
+      }
+      updateProgressBar(40);
+      $.get(`/technical_analysis?symbol=${symbol}`, function (data) {
+        $('#results').text(JSON.stringify(data, null, 2));
+        updateProgressBar(60);
+      });
+    }
+
+    function predict() {
+      const symbol = $('#symbol').val();
+      if (!symbol) {
+        alert('Please enter a symbol.');
+        return;
+      }
+      updateProgressBar(60);
+      $.get(`/predict?symbol=${symbol}`, function (data) {
+        $('#results').text(JSON.stringify(data, null, 2));
+        updateProgressBar(80);
+      });
+    }
+
+    function backtest() {
+      const symbol = $('#symbol').val();
+      if (!symbol) {
+        alert('Please enter a symbol.');
+        return;
+      }
+      updateProgressBar(80);
+      $.get(`/backtest?symbol=${symbol}`, function (data) {
+        $('#results').text(JSON.stringify(data.backtest_results, null, 2));
+        $('#backtest-plot').replaceWith(`<img src="${data.plot_url}" class="img-fluid" id="backtest-plot">`);
+        updateProgressBar(90);
+      });
+    }
+
+    function riskAnalysis() {
+      const symbol = $('#symbol').val();
+      if (!symbol) {
+        alert('Please enter a symbol.');
+        return;
+      }
+      updateProgressBar(90);
+      $.get(`/risk_analysis?symbol=${symbol}`, function (data) {
+        $('#results').text(JSON.stringify(data, null, 2));
+        updateProgressBar(95);
+      });
+    }
+    function generateReport() {
+        const symbol = $('#symbol').val();
+        if (!symbol) {
+            alert('Please enter a symbol.');
+            return;
+        }
+        updateProgressBar(100);
+
+        // Fetching and displaying the report in the results section
+        $.get(`/generate_report?symbol=${symbol}`, function (data) {
+            if (data.error) {
+                $('#results').text(data.error);  // Show error message
+            } else if (data.report_file) {
+                const reportUrl = data.report_file;
+                $('#results').html(`<iframe src="${reportUrl}" width="100%" height="600px"></iframe>`);
+            } else {
+                $('#results').text("Report file URL not found in the response.");
+            }
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            $('#results').text("Error generating the report: " + textStatus + ", " + errorThrown);
+        });
+    }
+  </script>
+</body>
+</html>
