@@ -52,6 +52,14 @@ risk_management.py: Module for providing risk management insights.
 reports.py: Module for generating reports.
 templates/index.html: HTML template for the web interface.
 requirements.txt: List of required dependencies.
+
+Screenshots:
+![image](https://github.com/user-attachments/assets/83021c75-6b73-4530-acb4-b6d8315c7df3)
+![image](https://github.com/user-attachments/assets/9570302f-72a8-4a45-8b1b-f66d955bf4cf)
+![image](https://github.com/user-attachments/assets/c04a2e1e-5ba3-4ff7-bf5e-e763e8c3364e)
+![image](https://github.com/user-attachments/assets/638a3a84-8cf1-4f9d-983d-cecea32a1905)
+![image](https://github.com/user-attachments/assets/84f0b294-9185-42bc-b8c0-79de22d06169)
+
 Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
