@@ -248,10 +248,10 @@
         alert('Please enter a symbol.');
         return;
       }
-      updateProgressBar(20);
+      updateProgressBar(10);
       $.get(`/fetch_data?symbol=${symbol}`, function (data) {
         $('#results').text(JSON.stringify(data, null, 2));
-        updateProgressBar(40);
+        updateProgressBar(20);
       });
     }
 
@@ -261,10 +261,10 @@
         alert('Please enter a symbol.');
         return;
       }
-      updateProgressBar(40);
+      updateProgressBar(30);
       $.get(`/technical_analysis?symbol=${symbol}`, function (data) {
         $('#results').text(JSON.stringify(data, null, 2));
-        updateProgressBar(60);
+        updateProgressBar(40);
       });
     }
 
@@ -274,10 +274,10 @@
         alert('Please enter a symbol.');
         return;
       }
-      updateProgressBar(60);
+      updateProgressBar(50);
       $.get(`/predict?symbol=${symbol}`, function (data) {
         $('#results').text(JSON.stringify(data, null, 2));
-        updateProgressBar(80);
+        updateProgressBar(60);
       });
     }
 
@@ -287,11 +287,11 @@
         alert('Please enter a symbol.');
         return;
       }
-      updateProgressBar(80);
+      updateProgressBar(70);
       $.get(`/backtest?symbol=${symbol}`, function (data) {
         $('#results').text(JSON.stringify(data.backtest_results, null, 2));
         $('#backtest-plot').replaceWith(`<img src="${data.plot_url}" class="img-fluid" id="backtest-plot">`);
-        updateProgressBar(90);
+        updateProgressBar(80);
       });
     }
 

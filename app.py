@@ -82,6 +82,7 @@ def backtest():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/risk_analysis', methods=['GET'])
 def risk():
     symbol = request.args.get('symbol', 'bitcoin')

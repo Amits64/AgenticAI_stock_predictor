@@ -1,4 +1,3 @@
-# ai_model.py
 import os
 import pandas as pd
 from xgboost import XGBRegressor
@@ -11,6 +10,13 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 import joblib
 import numpy as np
+from tensorflow.keras.models import load_model
+import pickle
+
+# Load the saved LSTM model and scaler
+lstm_model = load_model("ai_model.keras")
+with open("scaler.pkl", "rb") as f:
+    scaler = pickle.load(f)
 
 
 def prepare_features(df: pd.DataFrame):
@@ -37,6 +43,17 @@ def prepare_features(df: pd.DataFrame):
     return features
 
 
+def create_sequences(data, seq_length=50, features=None):
+    """
+    Create sequences for LSTM input with the provided features.
+    """
+    sequences = []
+    for i in range(len(data) - seq_length):
+        sequence = data[i:i + seq_length, :]
+        sequences.append(sequence)
+    return np.array(sequences)
+
+
 def predict_price(df: pd.DataFrame, model=None):
     """
     Predicts the next day's closing price using an ensemble of models.
@@ -56,14 +73,18 @@ def predict_price(df: pd.DataFrame, model=None):
     X = X.loc[:, ~X.columns.duplicated()]
 
     # Normalize features
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    feature_scaler = StandardScaler()
+    X_scaled = feature_scaler.fit_transform(X)
+
+    # Normalize target (Close price)
+    target_scaler = StandardScaler()
+    y_scaled = target_scaler.fit_transform(y.values.reshape(-1, 1))
 
     # Split train/test without shuffling (time series)
     tscv = TimeSeriesSplit(n_splits=5)
     for train_index, test_index in tscv.split(X_scaled):
         X_train, X_test = X_scaled[train_index], X_scaled[test_index]
-        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+        y_train, y_test = y_scaled[train_index], y_scaled[test_index]
 
     # Use pre-trained model if provided
     if model is None:
@@ -76,6 +97,9 @@ def predict_price(df: pd.DataFrame, model=None):
     last_row = X_scaled[[-1]]
     next_day_pred = model.predict(last_row)[0]
 
+    # Inverse transform the predicted value to the original scale of the target (Close)
+    next_day_pred = target_scaler.inverse_transform(next_day_pred.reshape(-1, 1))[0][0]
+
     # Calculate the time to reach the predicted price
     time_to_reach_predicted_price = calculate_time_to_reach(df, next_day_pred)
 
@@ -83,10 +107,44 @@ def predict_price(df: pd.DataFrame, model=None):
     next_day_pred = float(next_day_pred)
     mse = float(mse)
 
+    # Prepare data for LSTM prediction
+    lstm_features = features[['Close', 'SMA_20', 'EMA_20', 'RSI', 'MACD_12_26_9']].values  # Include all relevant features
+    lstm_X = create_sequences(lstm_features, seq_length=50)  # Use all features
+
+    # LSTM model expects shape (batch_size, seq_length, num_features)
+    lstm_X = lstm_X.reshape(
+        (lstm_X.shape[0], lstm_X.shape[1], lstm_X.shape[2]))  # Reshaping to (batch_size, seq_length, features)
+
+    # Make sure we are passing correctly reshaped data
+    print(f"LSTM Input Shape: {lstm_X.shape}")
+
+    # Make predictions using the LSTM model
+    lstm_preds = lstm_model.predict(lstm_X)
+
+    # Print the first few LSTM predictions before inverse transformation
+    print(f"LSTM Predictions (Before Inverse Transform): {lstm_preds[:5]}")
+
+    # Reshape the LSTM predictions before inverse transforming
+    lstm_preds = lstm_preds.reshape(-1, 1)  # Reshape to (316, 1)
+
+    # Use the correct scaler for the 'Close' column (target_scaler for 'Close')
+    lstm_preds = target_scaler.inverse_transform(lstm_preds)  # Inverse transform for 'Close'
+
+    # Print the first few LSTM predictions after inverse transformation
+    print(f"LSTM Predictions (After Inverse Transform): {lstm_preds[:5]}")
+
+    # Ensure LSTM predictions are within the range of historical Close prices
+    lstm_pred_value = float(lstm_preds[-1][0])  # Last prediction from LSTM model
+    lstm_pred_value = max(min(lstm_pred_value, df['Close'].max()), df['Close'].min())
+
+    # Print out the final LSTM prediction
+    print(f"LSTM Prediction (Final, Constrained): {lstm_pred_value}")
+
     return {
-        "next_day_prediction": next_day_pred,
+        "next_prediction": next_day_pred,
         "test_mse": mse,
-        "time_to_reach_predicted_price": time_to_reach_predicted_price
+        "time_to_reach_predicted_price": time_to_reach_predicted_price,
+        "lstm_predictions": lstm_pred_value
     }
 
 
@@ -123,7 +181,17 @@ def train_model(X_train, y_train):
     """
     Train the stacking model and return the trained model.
     """
-    # Ensemble model
+    # Log scaled data statistics
+    print("Training Data Statistics:")
+    print(f"Train Close: Min={y_train.min()}, Max={y_train.max()}, Mean={y_train.mean()}")
+
+    # Scale the Close data
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_train)
+
+    print(f"Scaled Train Close: Min={X_scaled.min()}, Max={X_scaled.max()}, Mean={X_scaled.mean()}")
+
+    # Model training
     estimators = [
         ('xgb', XGBRegressor(n_estimators=100, learning_rate=0.1)),
         ('ridge', Ridge(alpha=1.0)),

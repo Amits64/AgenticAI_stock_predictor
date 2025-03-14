@@ -1,38 +1,11 @@
-#reports.py
 import os
-import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.dates import DateFormatter
-import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import pandas as pd
+import numpy as np
 from datetime import datetime, timedelta
 from risk_management import risk_analysis
 
-
-def generate_candlestick_chart(df, filename="report.png"):
-    """
-    Generates a static candlestick chart with technical indicators.
-    """
-    try:
-        from mplfinance.original_flavor import candlestick_ohlc
-    except ImportError:
-        raise ImportError("Please install mplfinance to generate candlestick charts.")
-
-    df_chart = df.copy()
-    # Convert Date column to numerical format for plotting
-    df_chart['Date_num'] = df_chart['Date'].map(pd.Timestamp.toordinal)
-    ohlc = df_chart[['Date_num', 'Open', 'High', 'Low', 'Close']].values
-
-    fig, ax = plt.subplots(figsize=(12, 6))
-    candlestick_ohlc(ax, ohlc, width=0.6, colorup='g', colordown='r', alpha=0.8)
-    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
-    plt.xticks(rotation=45)
-    ax.set_title("Candlestick Chart")
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.close(fig)
-    return filename
 
 def add_moving_averages(df):
     """
@@ -41,7 +14,6 @@ def add_moving_averages(df):
     df['SMA_20'] = df['Close'].rolling(window=20).mean()
     df['SMA_50'] = df['Close'].rolling(window=50).mean()
     df['EMA_20'] = df['Close'].ewm(span=20, adjust=False).mean()
-    df['EMA_50'] = df['Close'].ewm(span=50, adjust=False).mean()
     return df
 
 
@@ -61,23 +33,47 @@ def calculate_rsi(df, window=14):
     return df
 
 
+def plot_fibonacci(df):
+    """
+    Plots Fibonacci retracement levels based on the high and low of the price data.
+    """
+    high_price = df['High'].max()
+    low_price = df['Low'].min()
+
+    diff = high_price - low_price
+    levels = {
+        'Level 0%': high_price,
+        'Level 23.6%': high_price - 0.236 * diff,
+        'Level 38.2%': high_price - 0.382 * diff,
+        'Level 50%': high_price - 0.5 * diff,
+        'Level 61.8%': high_price - 0.618 * diff,
+        'Level 100%': low_price,
+    }
+
+    return levels
+
+
 def plot_interactive_chart(df, filename="interactive_report.html"):
     """
-    Creates an interactive candlestick chart with Plotly, including risk management levels.
+    Creates an interactive candlestick chart with Plotly, including key indicators and risk management levels.
     """
+    # Add Moving Averages and RSI
     df = add_moving_averages(df)
     df = calculate_rsi(df)
 
     # Get the latest risk analysis data
     risk_data = risk_analysis(df)
 
-    # Create subplots for the candlestick chart and RSI indicator
+    # Calculate Fibonacci levels
+    fib_levels = plot_fibonacci(df)
+
+    # Create subplots for the candlestick chart and RSI
     fig = make_subplots(
         rows=2, cols=1,
         row_heights=[0.7, 0.3],
         shared_xaxes=True,
-        vertical_spacing=0.1,
-        subplot_titles=('Candlestick Chart', 'RSI (14)'),
+        vertical_spacing=0.05,
+        subplot_titles=('Price and Technical Indicators', 'RSI (14)'),
         row_titles=['Price', 'RSI'],
         horizontal_spacing=0.1
     )
@@ -88,43 +84,51 @@ def plot_interactive_chart(df, filename="interactive_report.html"):
         open=df['Open'], high=df['High'],
         low=df['Low'], close=df['Close'],
         name='Candlestick',
-        increasing=dict(line=dict(color='green')),  # Correct way to set increasing line color
-        decreasing=dict(line=dict(color='red')),   # Correct way to set decreasing line color
+        increasing=dict(line=dict(color='#1E8449')),  # Green for up
+        decreasing=dict(line=dict(color='#E74C3C')),  # Red for down
         showlegend=False
     ), row=1, col=1)
 
-    # Moving Averages
+    # Moving Averages (SMA & EMA)
     fig.add_trace(
-        go.Scatter(x=df['Date'], y=df['SMA_20'], mode='lines', name='SMA 20', line=dict(color='blue', width=1.5)),
+        go.Scatter(x=df['Date'], y=df['SMA_20'], mode='lines', name='SMA 20', line=dict(color='#3498DB', width=2)),
         row=1, col=1)
     fig.add_trace(
-        go.Scatter(x=df['Date'], y=df['SMA_50'], mode='lines', name='SMA 50', line=dict(color='orange', width=1.5)),
+        go.Scatter(x=df['Date'], y=df['SMA_50'], mode='lines', name='SMA 50', line=dict(color='#F39C12', width=2)),
         row=1, col=1)
     fig.add_trace(
-        go.Scatter(x=df['Date'], y=df['EMA_20'], mode='lines', name='EMA 20', line=dict(color='purple', width=1.5)),
-        row=1, col=1)
-    fig.add_trace(
-        go.Scatter(x=df['Date'], y=df['EMA_50'], mode='lines', name='EMA 50', line=dict(color='brown', width=1.5)),
+        go.Scatter(x=df['Date'], y=df['EMA_20'], mode='lines', name='EMA 20', line=dict(color='#8E44AD', width=2)),
         row=1, col=1)
 
+    # Plot Fibonacci Levels
+    for level_name, level_value in fib_levels.items():
+        fig.add_trace(go.Scatter(
+            x=df['Date'], y=[level_value] * len(df), mode='lines', name=level_name,
+            line=dict(dash='dash', width=2)
+        ), row=1, col=1)
+
     # RSI Indicator
-    fig.add_trace(go.Scatter(x=df['Date'], y=df['RSI'], mode='lines', name='RSI', line=dict(color='orange', width=1.5)),
+    fig.add_trace(go.Scatter(x=df['Date'], y=df['RSI'], mode='lines', name='RSI', line=dict(color='#F39C12', width=2)),
                   row=2, col=1)
     fig.add_hline(y=70, line=dict(color='red', dash='dash'), row=2, col=1)
     fig.add_hline(y=30, line=dict(color='green', dash='dash'), row=2, col=1)
 
     # Add support, resistance, stop-loss, and take-profit levels
     fig.add_trace(go.Scatter(
-        x=df['Date'], y=[risk_data['support']] * len(df), mode='lines', name='Support', line=dict(color='green', dash='dot')),
+        x=df['Date'], y=[risk_data['support']] * len(df), mode='lines', name='Support',
+        line=dict(color='#27AE60', dash='dot')),
         row=1, col=1)
     fig.add_trace(go.Scatter(
-        x=df['Date'], y=[risk_data['resistance']] * len(df), mode='lines', name='Resistance', line=dict(color='red', dash='dot')),
+        x=df['Date'], y=[risk_data['resistance']] * len(df), mode='lines', name='Resistance',
+        line=dict(color='#E74C3C', dash='dot')),
         row=1, col=1)
     fig.add_trace(go.Scatter(
-        x=df['Date'], y=[risk_data['suggested_stop_loss']] * len(df), mode='lines', name='Stop Loss', line=dict(color='purple', dash='dot')),
+        x=df['Date'], y=[risk_data['suggested_stop_loss']] * len(df), mode='lines', name='Stop Loss',
+        line=dict(color='#8E44AD', dash='dot')),
         row=1, col=1)
     fig.add_trace(go.Scatter(
-        x=df['Date'], y=[risk_data['suggested_take_profit']] * len(df), mode='lines', name='Take Profit', line=dict(color='blue', dash='dot')),
+        x=df['Date'], y=[risk_data['suggested_take_profit']] * len(df), mode='lines', name='Take Profit',
+        line=dict(color='#2980B9', dash='dot')),
         row=1, col=1)
 
     # Customize layout
@@ -135,7 +139,8 @@ def plot_interactive_chart(df, filename="interactive_report.html"):
         yaxis_title="Price",
         xaxis_tickformat='%Y-%m-%d',
         template="plotly_dark",
-        height=800
+        height=800,
+        showlegend=True
     )
 
     fig.write_html(filename)

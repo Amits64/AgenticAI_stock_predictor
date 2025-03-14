@@ -1,6 +1,6 @@
-#risk_management.py
 import pandas as pd
 import numpy as np
+
 
 def calculate_support_resistance(df, window=20):
     """
@@ -22,6 +22,7 @@ def calculate_support_resistance(df, window=20):
 
     return df
 
+
 def calculate_atr(df, window=14):
     """
     Calculate the Average True Range (ATR), which is useful for setting dynamic stop-loss/take-profit.
@@ -33,14 +34,63 @@ def calculate_atr(df, window=14):
     df['ATR'] = df['TrueRange'].rolling(window=window).mean()
     return df
 
+
+def calculate_ichimoku(df):
+    """
+    Calculate the Ichimoku Cloud indicators: Tenkan-Sen, Kijun-Sen, Senkou Span A, Senkou Span B.
+    """
+    # Calculate the 9-period high and low (for Tenkan-Sen)
+    df['Tenkan_Sen'] = (df['High'].rolling(window=9).max() + df['Low'].rolling(window=9).min()) / 2
+
+    # Calculate the 26-period high and low (for Kijun-Sen)
+    df['Kijun_Sen'] = (df['High'].rolling(window=26).max() + df['Low'].rolling(window=26).min()) / 2
+
+    # Senkou Span A: (Tenkan-Sen + Kijun-Sen) / 2, shifted forward 26 periods
+    df['Senkou_Span_A'] = ((df['Tenkan_Sen'] + df['Kijun_Sen']) / 2).shift(26)
+
+    # Senkou Span B: 52-period high + 52-period low / 2, shifted forward 26 periods
+    df['Senkou_Span_B'] = ((df['High'].rolling(window=52).max() + df['Low'].rolling(window=52).min()) / 2).shift(26)
+
+    # Chikou Span: Close price shifted backward 26 periods
+    df['Chikou_Span'] = df['Close'].shift(-26)
+
+    return df
+
+
+def calculate_supertrend(df, atr_multiplier=3, window=14):
+    """
+    Calculate the Supertrend indicator.
+    """
+    df = calculate_atr(df, window)  # Ensure ATR is calculated first
+
+    # Calculate the basic upper and lower bands
+    df['Upper_Band'] = (df['High'] + df['Low']) / 2 + atr_multiplier * df['ATR']
+    df['Lower_Band'] = (df['High'] + df['Low']) / 2 - atr_multiplier * df['ATR']
+
+    # Initialize the Supertrend column
+    df['Supertrend'] = np.nan
+
+    # Loop through the dataframe to compute Supertrend values
+    for i in range(1, len(df)):
+        if df['Close'][i] <= df['Upper_Band'][i - 1]:
+            df['Supertrend'][i] = df['Upper_Band'][i]
+        else:
+            df['Supertrend'][i] = df['Lower_Band'][i]
+
+    return df
+
+
 def risk_analysis(df, account_balance=10000, risk_percentage=0.02):
     """
-    Provides advanced risk management insights.
-    This includes dynamic stop-loss/take-profit levels, position sizing, and risk-to-reward ratio.
+    Provides advanced risk management insights including dynamic stop-loss/take-profit levels,
+    position sizing, and risk-to-reward ratio.
+    Incorporates Ichimoku Cloud and Supertrend.
     """
-    # Calculate support, resistance, and ATR
+    # Calculate support, resistance, ATR, Ichimoku Cloud, and Supertrend
     df = calculate_support_resistance(df)
     df = calculate_atr(df)
+    df = calculate_ichimoku(df)
+    df = calculate_supertrend(df)
 
     latest = df.iloc[-1]
 
@@ -61,6 +111,11 @@ def risk_analysis(df, account_balance=10000, risk_percentage=0.02):
     dollar_risk = account_balance * risk_percentage
     position_size = dollar_risk / abs(latest['Close'] - stop_loss_atr)  # How many units of the asset to trade
 
+    # Risk management decisions based on Ichimoku and Supertrend
+    ichimoku_signal = "Bullish" if latest['Close'] > latest['Senkou_Span_A'] and latest['Close'] > latest[
+        'Senkou_Span_B'] else "Bearish"
+    supertrend_signal = "Buy" if latest['Close'] > latest['Supertrend'] else "Sell"
+
     return {
         "current_close": latest['Close'],
         "support": latest['Support'],
@@ -73,8 +128,11 @@ def risk_analysis(df, account_balance=10000, risk_percentage=0.02):
         "suggested_take_profit": take_profit_atr,
         "risk_to_reward_ratio": risk_to_reward_ratio,
         "position_size": position_size,
-        "account_balance_risked": dollar_risk
+        "account_balance_risked": dollar_risk,
+        "ichimoku_signal": ichimoku_signal,
+        "supertrend_signal": supertrend_signal
     }
+
 
 # Example usage:
 if __name__ == "__main__":
