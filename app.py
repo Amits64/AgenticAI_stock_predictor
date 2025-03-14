@@ -19,17 +19,25 @@ data_cache = {}
 def index():
     return render_template('index.html')
 
+
 @app.route('/fetch_data', methods=['GET'])
 def fetch_data():
-    symbol = request.args.get('symbol', 'bitcoin')
+    symbol = request.args.get('symbol', 'BTCUSDT')
     days = request.args.get('days', '365')
-    interval = request.args.get('interval', 'daily')
+    interval = request.args.get('interval', '1d')  # Change 'daily' to '1d'
+
+    # Make sure the interval is valid
+    valid_intervals = ['1m', '3m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1d', '3d', '1w', '1M']
+    if interval not in valid_intervals:
+        return jsonify({"error": f"Invalid interval. Valid intervals are: {', '.join(valid_intervals)}."}), 400
+
     try:
         df = fetch_historical_data(symbol, days, interval)
         data_cache[symbol] = df
         return jsonify({"message": f"Data fetched for {symbol}", "rows": len(df)})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/technical_analysis', methods=['GET'])
 def technical_analysis():

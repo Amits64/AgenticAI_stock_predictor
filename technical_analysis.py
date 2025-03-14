@@ -87,11 +87,11 @@ if __name__ == "__main__":
     # Create the DataFrame with the date range from the last year
     df = pd.DataFrame({
         'Date': pd.date_range(start=start_date, end=end_date, freq='D'),
-        'Open': np.random.uniform(1000, 2000, 365),
-        'High': np.random.uniform(2000, 2500, 365),
-        'Low': np.random.uniform(800, 1000, 365),
-        'Close': np.random.uniform(1500, 2000, 365),
-        'Volume': np.random.randint(100000, 1000000, 365)  # Volume data for VWAP
+        'Open': np.random.uniform(1000, 2000, 3650),
+        'High': np.random.uniform(2000, 2500, 3650),
+        'Low': np.random.uniform(800, 1000, 3650),
+        'Close': np.random.uniform(1500, 2000, 3650),
+        'Volume': np.random.randint(100000, 1000000, 3650)  # Volume data for VWAP
     })
 
     # Add technical indicators
