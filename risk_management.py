@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
 def calculate_support_resistance(df, window=20):
     """
     Calculate support and resistance levels as rolling minimum and maximum.
@@ -22,7 +21,6 @@ def calculate_support_resistance(df, window=20):
 
     return df
 
-
 def calculate_atr(df, window=14):
     """
     Calculate the Average True Range (ATR), which is useful for setting dynamic stop-loss/take-profit.
@@ -33,7 +31,6 @@ def calculate_atr(df, window=14):
     df['TrueRange'] = df[['High-Low', 'High-Close', 'Low-Close']].max(axis=1)
     df['ATR'] = df['TrueRange'].rolling(window=window).mean()
     return df
-
 
 def calculate_ichimoku(df):
     """
@@ -56,7 +53,6 @@ def calculate_ichimoku(df):
 
     return df
 
-
 def calculate_supertrend(df, atr_multiplier=3, window=14):
     """
     Calculate the Supertrend indicator.
@@ -73,12 +69,11 @@ def calculate_supertrend(df, atr_multiplier=3, window=14):
     # Loop through the dataframe to compute Supertrend values
     for i in range(1, len(df)):
         if df['Close'][i] <= df['Upper_Band'][i - 1]:
-            df['Supertrend'][i] = df['Upper_Band'][i]
+            df.loc[i, 'Supertrend'] = df['Upper_Band'][i]
         else:
-            df['Supertrend'][i] = df['Lower_Band'][i]
+            df.loc[i, 'Supertrend'] = df['Lower_Band'][i]
 
     return df
-
 
 def risk_analysis(df, account_balance=10000, risk_percentage=0.02):
     """
@@ -112,8 +107,7 @@ def risk_analysis(df, account_balance=10000, risk_percentage=0.02):
     position_size = dollar_risk / abs(latest['Close'] - stop_loss_atr)  # How many units of the asset to trade
 
     # Risk management decisions based on Ichimoku and Supertrend
-    ichimoku_signal = "Bullish" if latest['Close'] > latest['Senkou_Span_A'] and latest['Close'] > latest[
-        'Senkou_Span_B'] else "Bearish"
+    ichimoku_signal = "Bullish" if latest['Close'] > latest['Senkou_Span_A'] and latest['Close'] > latest['Senkou_Span_B'] else "Bearish"
     supertrend_signal = "Buy" if latest['Close'] > latest['Supertrend'] else "Sell"
 
     return {
@@ -132,7 +126,6 @@ def risk_analysis(df, account_balance=10000, risk_percentage=0.02):
         "ichimoku_signal": ichimoku_signal,
         "supertrend_signal": supertrend_signal
     }
-
 
 # Example usage:
 if __name__ == "__main__":

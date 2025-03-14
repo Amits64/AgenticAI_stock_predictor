@@ -210,6 +210,7 @@
             </div>
             <h3 class="mt-4 section-title">Results</h3>
             <div class="results-container">
+              <button id="copy-button" class="btn btn-outline-light mb-3"><i class="fas fa-copy"></i> Copy</button>
               <pre id="results" class="bg-light p-3 border"></pre>
             </div>
             <h3 class="mt-4 section-title">Backtest Plot</h3>
@@ -307,28 +308,41 @@
         updateProgressBar(95);
       });
     }
-    function generateReport() {
-        const symbol = $('#symbol').val();
-        if (!symbol) {
-            alert('Please enter a symbol.');
-            return;
-        }
-        updateProgressBar(100);
 
-        // Fetching and displaying the report in the results section
-        $.get(`/generate_report?symbol=${symbol}`, function (data) {
-            if (data.error) {
-                $('#results').text(data.error);  // Show error message
-            } else if (data.report_file) {
-                const reportUrl = data.report_file;
-                $('#results').html(`<iframe src="${reportUrl}" width="100%" height="600px"></iframe>`);
-            } else {
-                $('#results').text("Report file URL not found in the response.");
-            }
-        }).fail(function (jqXHR, textStatus, errorThrown) {
-            $('#results').text("Error generating the report: " + textStatus + ", " + errorThrown);
-        });
+    function generateReport() {
+      const symbol = $('#symbol').val();
+      if (!symbol) {
+        alert('Please enter a symbol.');
+        return;
+      }
+      updateProgressBar(100);
+
+      // Fetching and displaying the report in the results section
+      $.get(`/generate_report?symbol=${symbol}`, function (data) {
+        if (data.error) {
+          $('#results').text(data.error);  // Show error message
+        } else if (data.report_file) {
+          const reportUrl = data.report_file;
+          $('#results').html(`<iframe src="${reportUrl}" width="100%" height="500px"></iframe>`);
+        }
+      });
     }
+
+    // Copy button functionality
+    $('#copy-button').click(function () {
+      const resultText = $('#results').text();
+      if (!resultText) {
+        alert('Nothing to copy!');
+        return;
+      }
+      const textarea = document.createElement('textarea');
+      textarea.value = resultText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      alert('Copied to clipboard!');
+    });
   </script>
 </body>
 </html>

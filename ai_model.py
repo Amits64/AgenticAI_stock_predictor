@@ -1,17 +1,18 @@
 import os
+
+import numpy as np
 import pandas as pd
-from xgboost import XGBRegressor
+import pickle
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import mean_squared_error
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.ensemble import StackingRegressor
 from sklearn.linear_model import Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
-import joblib
-import numpy as np
+from xgboost import XGBRegressor
 from tensorflow.keras.models import load_model
-import pickle
+import joblib
 
 # Load the saved LSTM model and scaler
 lstm_model = load_model("ai_model.keras")
@@ -41,7 +42,7 @@ def prepare_features(df: pd.DataFrame):
     features = features.dropna()
     return features
 
-def create_sequences(data, seq_length=50, features=None):
+def create_sequences(data, seq_length=50):
     """
     Create sequences for LSTM input with the provided features.
     """
@@ -109,8 +110,7 @@ def predict_price(df: pd.DataFrame, model=None):
     lstm_X = create_sequences(lstm_features, seq_length=50)  # Use all features
 
     # LSTM model expects shape (batch_size, seq_length, num_features)
-    lstm_X = lstm_X.reshape(
-        (lstm_X.shape[0], lstm_X.shape[1], lstm_X.shape[2]))  # Reshaping to (batch_size, seq_length, features)
+    lstm_X = lstm_X.reshape((lstm_X.shape[0], lstm_X.shape[1], lstm_X.shape[2]))  # Reshaping to (batch_size, seq_length, features)
 
     # Make sure we are passing correctly reshaped data
     print(f"LSTM Input Shape: {lstm_X.shape}")
@@ -143,6 +143,7 @@ def predict_price(df: pd.DataFrame, model=None):
         "time_to_reach_predicted_price": time_to_reach_predicted_price,
         "lstm_predictions": lstm_pred_value
     }
+
 
 def calculate_time_to_reach(df, predicted_price):
     """
@@ -231,7 +232,6 @@ def load_model(model_filename='ensemble_model.pkl'):
     except Exception as e:
         print(f"An error occurred while loading the model: {e}")
         return None
-
 
 # Example usage
 if __name__ == "__main__":
