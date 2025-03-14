@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pickle
-from sklearn.preprocessing import StandardScaler  # Changed to StandardScaler
+from sklearn.preprocessing import MinMaxScaler  # Changed to MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, GRU, Dense, Dropout, Bidirectional
 from tensorflow.keras.optimizers import Adam
@@ -39,7 +39,7 @@ except Exception as e:
     exit()
 
 # Normalize the data (ensure no NaN or Inf values are in the input data)
-scaler = StandardScaler()  # Changed to StandardScaler
+scaler = MinMaxScaler()  # Changed to MinMaxScaler
 df['price'] = scaler.fit_transform(df[['price']])
 
 # Save the scaler for later use

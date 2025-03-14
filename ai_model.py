@@ -3,7 +3,7 @@ import pandas as pd
 from xgboost import XGBRegressor
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import mean_squared_error
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.ensemble import StackingRegressor
 from sklearn.linear_model import Ridge
 from sklearn.neighbors import KNeighborsRegressor
@@ -17,7 +17,6 @@ import pickle
 lstm_model = load_model("ai_model.keras")
 with open("scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
-
 
 def prepare_features(df: pd.DataFrame):
     """
@@ -42,7 +41,6 @@ def prepare_features(df: pd.DataFrame):
     features = features.dropna()
     return features
 
-
 def create_sequences(data, seq_length=50, features=None):
     """
     Create sequences for LSTM input with the provided features.
@@ -52,7 +50,6 @@ def create_sequences(data, seq_length=50, features=None):
         sequence = data[i:i + seq_length, :]
         sequences.append(sequence)
     return np.array(sequences)
-
 
 def predict_price(df: pd.DataFrame, model=None):
     """
@@ -73,11 +70,11 @@ def predict_price(df: pd.DataFrame, model=None):
     X = X.loc[:, ~X.columns.duplicated()]
 
     # Normalize features
-    feature_scaler = StandardScaler()
+    feature_scaler = MinMaxScaler()
     X_scaled = feature_scaler.fit_transform(X)
 
     # Normalize target (Close price)
-    target_scaler = StandardScaler()
+    target_scaler = MinMaxScaler()
     y_scaled = target_scaler.fit_transform(y.values.reshape(-1, 1))
 
     # Split train/test without shuffling (time series)
@@ -147,7 +144,6 @@ def predict_price(df: pd.DataFrame, model=None):
         "lstm_predictions": lstm_pred_value
     }
 
-
 def calculate_time_to_reach(df, predicted_price):
     """
     Calculate the time to reach the predicted price based on historical data.
@@ -176,7 +172,6 @@ def calculate_time_to_reach(df, predicted_price):
         "stddev_days": float('inf')
     }
 
-
 def train_model(X_train, y_train):
     """
     Train the stacking model and return the trained model.
@@ -191,6 +186,9 @@ def train_model(X_train, y_train):
 
     print(f"Scaled Train Close: Min={X_scaled.min()}, Max={X_scaled.max()}, Mean={X_scaled.mean()}")
 
+    # Ensure y_train is a 1D array (use ravel)
+    y_train = y_train.ravel()  # Convert y_train to a 1D array
+
     # Model training
     estimators = [
         ('xgb', XGBRegressor(n_estimators=100, learning_rate=0.1)),
@@ -199,9 +197,8 @@ def train_model(X_train, y_train):
         ('svr', SVR(kernel='rbf'))
     ]
     model = StackingRegressor(estimators=estimators, final_estimator=XGBRegressor(n_estimators=100, learning_rate=0.1))
-    model.fit(X_train, y_train)
+    model.fit(X_scaled, y_train)  # Fit the model with the reshaped y_train
     return model
-
 
 def save_model(model, model_filename='ensemble_model.pkl'):
     """
@@ -218,7 +215,6 @@ def save_model(model, model_filename='ensemble_model.pkl'):
             print("Model is not valid, cannot save.")
     except Exception as e:
         print(f"An error occurred while saving the model: {e}")
-
 
 def load_model(model_filename='ensemble_model.pkl'):
     """
