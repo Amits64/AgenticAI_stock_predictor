@@ -25,7 +25,7 @@ jobs:
         python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r requirements.txt flake8
 
     - name: Run Linter (Flake8)
       run: |
@@ -50,10 +50,10 @@ jobs:
         flags: unittests
         name: AgenticAI_Coverage
 
-    - name: Notify on Failure (Slack)
-      if: failure()
-      uses: rtCamp/action-slack-notify@v2
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        SLACK_COLOR: "#ff0000"
-        SLACK_MESSAGE: "🚨 Test Failed on ${{ github.repository }} - ${{ github.ref }}"
+    #- name: Notify on Failure (Slack)
+    #  if: failure()
+    #  uses: rtCamp/action-slack-notify@v2
+    #  env:
+    #    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #    SLACK_COLOR: "#ff0000"
+    #    SLACK_MESSAGE: "🚨 Test Failed on ${{ github.repository }} - ${{ github.ref }}"
