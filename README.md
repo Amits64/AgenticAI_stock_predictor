@@ -1,80 +1,129 @@
-# AgenticAI Crypto Coin Price Predictor
+⸻
 
-AgenticAI is a sophisticated and reliable crypto coin price predictor that leverages advanced machine learning models to predict the next day's closing price of various cryptocurrencies. It also provides risk management insights, including dynamic stop-loss/take-profit levels, position sizing, and risk-to-reward ratios.
+AgenticAI Crypto Coin Price Predictor
 
-## Features
+AgenticAI is a sophisticated and reliable cryptocurrency price predictor that leverages advanced machine learning models to forecast the next day’s closing price of various cryptocurrencies. It also provides in-depth risk management insights, including dynamic stop-loss/take-profit levels, position sizing, and risk-to-reward ratios.
 
-- **Data Fetching**: Fetch historical data for various cryptocurrencies.
-- **Technical Analysis**: Add technical indicators such as SMA, EMA, RSI, MACD, and more.
-- **Price Prediction**: Predict the next day's closing price using an ensemble of models.
-- **Backtesting**: Backtest trading strategies and visualize the results.
-- **Risk Management**: Provide advanced risk management insights, including support/resistance levels, ATR, and position sizing.
-- **Report Generation**: Generate comprehensive reports with visualizations.
+⸻
 
-## Installation
+Features
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/AgenticAI_stock_predictor.git
-   cd AgenticAI_stock_predictor
-Create a virtual environment and activate it:
+✅ Data Fetching: Fetch historical cryptocurrency data using APIs.
+✅ Technical Analysis: Apply key indicators such as SMA, EMA, RSI, MACD, Bollinger Bands, ATR, and more.
+✅ AI-Powered Price Prediction: Predict the next day’s closing price using an ensemble of machine learning models.
+✅ Backtesting: Backtest trading strategies and visualize performance metrics.
+✅ Risk Management: Get detailed insights, including support/resistance levels, ATR-based stop-loss, and dynamic position sizing.
+✅ Comprehensive Report Generation: Generate interactive reports with visual analytics.
+
+⸻
+
+Installation
+
+1. Clone the Repository
+
+git clone https://github.com/yourusername/AgenticAI_stock_predictor.git
+cd AgenticAI_stock_predictor
+
+2. Create a Virtual Environment and Activate It
 
 python -m venv venv
 source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-Install the required dependencies:
+
+3. Install Required Dependencies
 
 pip install -r requirements.txt
+
+
+
+⸻
+
 Usage
-Run the Flask App:
+
+Step 1: Train the AI Model (Must Be Done First)
+
+Before making predictions, you must train the AI model by executing the following command:
+
+python train_model.py
+
+This step generates the machine learning model that will be used by other scripts for price prediction.
+
+Step 2: Run the Flask Web App
+
+Once the model is trained, start the Flask application:
 
 python app.py
-Access the Web Interface: Open your web browser and go to http://127.0.0.1:5000/.
 
-Fetch Data: Enter the symbol of the cryptocurrency (e.g., bitcoin) and click on "Fetch Data" to retrieve historical data.
+Now, open your web browser and visit: http://127.0.0.1:5000/
 
-Perform Technical Analysis: Click on "Technical Analysis" to add technical indicators to the fetched data.
+Step 3: Fetch Historical Data
+	•	Enter the cryptocurrency symbol (e.g., bitcoin, ethereum) and click on “Fetch Data” to retrieve historical price data.
 
-Predict Price: Click on "Predict" to predict the next day's closing price using the ensemble model.
+Step 4: Perform Technical Analysis
+	•	Click on “Technical Analysis” to apply key indicators to the fetched data.
 
-Backtest Strategy: Click on "Backtest" to backtest the trading strategy and visualize the results.
+Step 5: Predict the Next Day’s Price
+	•	Click on “Predict” to use the trained AI model and forecast the next day’s closing price.
 
-Risk Analysis: Click on "Risk Analysis" to get advanced risk management insights.
+Step 6: Backtest Trading Strategies
+	•	Click on “Backtest” to evaluate trading strategies and visualize their past performance.
 
-Generate Report: Click on "Generate Report" to generate a comprehensive report with visualizations.
+Step 7: Risk Analysis & Insights
+	•	Click on “Risk Analysis” to generate stop-loss levels, position sizing, and risk-to-reward calculations.
+
+Step 8: Generate a Full Report
+	•	Click on “Generate Report” to export a complete visual analysis of predictions, strategies, and insights.
+
+⸻
 
 Project Structure
-app.py: Main Flask application file.
-data_fetcher.py: Module for fetching historical data.
-technical_analysis.py: Module for adding technical indicators.
-ai_model.py: Module for training and predicting prices using machine learning models.
-backtesting.py: Module for backtesting trading strategies.
-risk_management.py: Module for providing risk management insights.
-reports.py: Module for generating reports.
-templates/index.html: HTML template for the web interface.
-requirements.txt: List of required dependencies.
 
-Screenshots:
-![image](https://github.com/user-attachments/assets/83021c75-6b73-4530-acb4-b6d8315c7df3)
-![image](https://github.com/user-attachments/assets/9570302f-72a8-4a45-8b1b-f66d955bf4cf)
-![image](https://github.com/user-attachments/assets/c04a2e1e-5ba3-4ff7-bf5e-e763e8c3364e)
-![image](https://github.com/user-attachments/assets/638a3a84-8cf1-4f9d-983d-cecea32a1905)
-![image](https://github.com/user-attachments/assets/84f0b294-9185-42bc-b8c0-79de22d06169)
+AgenticAI_stock_predictor/
+│── app.py                 # Main Flask application file
+│── train_model.py         # Script to train the AI model (must run first)
+│── data_fetcher.py        # Module for fetching historical data
+│── technical_analysis.py  # Module for adding technical indicators
+│── ai_model.py            # Core AI model for price prediction
+│── backtesting.py         # Backtesting module for trading strategies
+│── risk_management.py     # Module for risk analysis and position sizing
+│── reports.py             # Generates detailed reports with visualizations
+│── templates/index.html   # HTML template for the web interface
+│── requirements.txt       # List of required dependencies
+└── README.md              # Documentation
+
+
+
+⸻
+
+Screenshots
+
+
+⸻
 
 Contributing
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+
+Contributions are welcome! If you have ideas for improvements or bug fixes, feel free to open an issue or submit a pull request.
+
+⸻
 
 License
+
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-Acknowledgements
-XGBoost
-Scikit-Learn
-Pandas
-Flask
-Matplotlib
-mplfinance
+⸻
+
+Acknowledgments
+	•	XGBoost
+	•	Scikit-Learn
+	•	Pandas
+	•	Flask
+	•	Matplotlib
+	•	mplfinance
+
+⸻
+
 Contact
-For any questions or inquiries, please contact [chauhanamit090@hotmail.com].
+
+For any questions or inquiries, please reach out to: chauhanamit090@hotmail.com
 
 Happy Predicting! 🚀
 
