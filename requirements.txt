@@ -12,3 +12,4 @@ Werkzeug==2.2.2
 requests~=2.32.3
 plotly~=6.0.0
 joblib~=1.4.2
+binance~=0.3
