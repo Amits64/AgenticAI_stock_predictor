@@ -19,15 +19,21 @@ def fetch_historical_data(symbol='BTCUSDT', days=1825, interval='1d'):
                                        'Quote_asset_volume', 'Number_of_trades', 'Taker_buy_base_asset_volume',
                                        'Taker_buy_quote_asset_volume', 'Ignore'])
 
-    # Convert the timestamp to datetime and drop unnecessary columns
+    # Convert the timestamp to datetime and set 'Date' as the index
     df['Date'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df = df[['Date', 'Open', 'High', 'Low', 'Close']]
+    df.set_index('Date', inplace=True)  # Set the 'Date' column as the index
+
+    # Include 'Volume' in the final DataFrame
+    df = df[['Open', 'High', 'Low', 'Close', 'Volume']]  # Include 'Volume' column
 
     # Convert numerical columns to float
-    df[['Open', 'High', 'Low', 'Close']] = df[['Open', 'High', 'Low', 'Close']].astype(float)
+    df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].astype(float)
+
+    # Verify 'Volume' is present and valid
+    if 'Volume' not in df.columns or df['Volume'].isnull().any():
+        raise ValueError("The 'Volume' column is missing or contains null values in the fetched data.")
 
     return df
-
 
 def fetch_real_time_data(symbol='BTCUSDT'):
     """
@@ -47,10 +53,15 @@ def fetch_real_time_data(symbol='BTCUSDT'):
 
 # Example usage
 if __name__ == "__main__":
-    # Fetch historical data for the last 365 days
-    df = fetch_historical_data(symbol='BTCUSDT', days=1825, interval='1d')
-    print(df.head())
+    try:
+        # Fetch historical data for the last 365 days
+        df = fetch_historical_data(symbol='BTCUSDT', days=1825, interval='1d')
+        print("Historical Data:")
+        print(df.head())
 
-    # Fetch real-time data
-    real_time_data = fetch_real_time_data(symbol='BTCUSDT')
-    print(real_time_data)
+        # Fetch real-time data
+        real_time_data = fetch_real_time_data(symbol='BTCUSDT')
+        print("\nReal-Time Data:")
+        print(real_time_data)
+    except Exception as e:
+        print(f"Error: {str(e)}")

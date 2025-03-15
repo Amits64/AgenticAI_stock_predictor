@@ -7,8 +7,7 @@ from tensorflow.keras.layers import LSTM, GRU, Dense, Dropout, Bidirectional
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 from binance.client import Client
-import time
-from datetime import datetime, timedelta
+from technical_analysis import add_technical_indicators  # Import the function
 
 # Set up Binance API client
 api_key = 'FpmgOpAE2bez7ct136mQVPdRt6lbanMnuDK54iqP0l928bQ13pAN5VPKuqH71XK4'
@@ -31,56 +30,49 @@ try:
     df['Date'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('Date', inplace=True)
 
-    # Keep only relevant columns (Close price for prediction)
-    df = df[['Close']]
+    # Keep only relevant columns
+    df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
     df = df.dropna()  # Drop any NaN values
+
+    # Verify 'Volume' column exists
+    if 'Volume' not in df.columns:
+        raise KeyError("The 'Volume' column is missing from the DataFrame.")
 
 except Exception as e:
     print(f"Error fetching data from Binance: {e}")
     exit()
 
+# Add technical indicators to the dataset
+df = add_technical_indicators(df)
+df = df.dropna()
+
 # Normalize the data
 scaler = MinMaxScaler()
-df['Close'] = scaler.fit_transform(df[['Close']])
+columns_to_normalize = ['Close', 'Open', 'High', 'Low', 'SMA_20', 'EMA_20', 'RSI',
+                        'MACD_12_26_9', 'MACDh_12_26_9', 'MACDs_12_26_9', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0',
+                        'ICH_SenkouSpanA_9_26_52', 'ICH_SenkouSpanB_9_26_52', 'Supertrend', 'VWAP', 'ATR', 'Volatility']
+if 'Volume' in df.columns:
+    columns_to_normalize.append('Volume')
+
+# Ensure all columns to normalize exist in the DataFrame
+columns_to_normalize = [col for col in columns_to_normalize if col in df.columns]
+
+df[columns_to_normalize] = scaler.fit_transform(df[columns_to_normalize])
 
 # Save the scaler for later use
 with open("scaler.pkl", "wb") as f:
     pickle.dump(scaler, f)
-
-# Add technical indicators to the dataset
-df['SMA_20'] = df['Close'].rolling(window=20).mean()
-df['EMA_20'] = df['Close'].ewm(span=20, adjust=False).mean()
-
-delta = df['Close'].diff()
-gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-rs = gain / loss
-df['RSI'] = 100 - (100 / (1 + rs))
-
-window = 20
-std_dev = df['Close'].rolling(window=window).std()
-df['BB_upper'] = df['EMA_20'] + (2 * std_dev)
-df['BB_lower'] = df['EMA_20'] - (2 * std_dev)
-
-df = df.dropna()
-
-# Normalize all columns again after technical indicator addition
-df[['Close', 'SMA_20', 'EMA_20', 'RSI', 'BB_upper', 'BB_lower']] = scaler.fit_transform(
-    df[['Close', 'SMA_20', 'EMA_20', 'RSI', 'BB_upper', 'BB_lower']]
-)
-
 
 # Create sequences for LSTM
 def create_sequences(data, seq_length=50):
     X, y = [], []
     for i in range(len(data) - seq_length):
         X.append(data[i:i + seq_length])
-        y.append(data[i + seq_length])
+        y.append(data[i + seq_length, 0])  # Predicting the 'Close' price
     return np.array(X), np.array(y)
 
-
 SEQ_LENGTH = 50
-X, y = create_sequences(df[['Close', 'SMA_20', 'EMA_20', 'RSI', 'BB_upper', 'BB_lower']].values, SEQ_LENGTH)
+X, y = create_sequences(df.values, SEQ_LENGTH)
 
 X = X.reshape((X.shape[0], X.shape[1], X.shape[2]))
 
