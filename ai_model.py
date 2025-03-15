@@ -12,13 +12,11 @@ from sklearn.svm import SVR
 from xgboost import XGBRegressor
 from tensorflow.keras.models import load_model
 import joblib
-from technical_analysis import add_technical_indicators
 
 # Load the saved LSTM model and scaler
 lstm_model = load_model("ai_model.keras")
 with open("scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
-
 
 def prepare_features(df: pd.DataFrame):
     """
@@ -43,7 +41,6 @@ def prepare_features(df: pd.DataFrame):
     features = features.dropna()
     return features
 
-
 def create_sequences(data, seq_length=50):
     """
     Create sequences for LSTM input with the provided features.
@@ -54,15 +51,10 @@ def create_sequences(data, seq_length=50):
         sequences.append(sequence)
     return np.array(sequences)
 
-
 def predict_price(df: pd.DataFrame, model=None):
     """
     Predicts the next day's closing price using an ensemble of models.
     """
-    # Add technical indicators to the dataset
-    df = add_technical_indicators(df)
-    df = df.dropna()
-
     features = prepare_features(df)
     if features.empty:
         return {"message": "Not enough data to predict."}
@@ -113,13 +105,11 @@ def predict_price(df: pd.DataFrame, model=None):
     mse = float(mse)
 
     # Prepare data for LSTM prediction
-    lstm_features = features[
-        ['Close', 'SMA_20', 'EMA_20', 'RSI', 'MACD_12_26_9']].values  # Include all relevant features
+    lstm_features = features[['Close', 'SMA_20', 'EMA_20', 'RSI', 'MACD_12_26_9']].values  # Include all relevant features
     lstm_X = create_sequences(lstm_features, seq_length=50)  # Use all features
 
     # LSTM model expects shape (batch_size, seq_length, num_features)
-    lstm_X = lstm_X.reshape(
-        (lstm_X.shape[0], lstm_X.shape[1], lstm_X.shape[2]))  # Reshaping to (batch_size, seq_length, features)
+    lstm_X = lstm_X.reshape((lstm_X.shape[0], lstm_X.shape[1], lstm_X.shape[2]))  # Reshaping to (batch_size, seq_length, features)
 
     # Make sure we are passing correctly reshaped data
     print(f"LSTM Input Shape: {lstm_X.shape}")
@@ -182,7 +172,6 @@ def calculate_time_to_reach(df, predicted_price):
         "stddev_days": float('inf')
     }
 
-
 def train_model(X_train, y_train):
     """
     Train the stacking model and return the trained model.
@@ -211,7 +200,6 @@ def train_model(X_train, y_train):
     model.fit(X_scaled, y_train)  # Fit the model with the reshaped y_train
     return model
 
-
 def save_model(model, model_filename='ensemble_model.pkl'):
     """
     Save the trained model to a file.
@@ -227,7 +215,6 @@ def save_model(model, model_filename='ensemble_model.pkl'):
             print("Model is not valid, cannot save.")
     except Exception as e:
         print(f"An error occurred while saving the model: {e}")
-
 
 def load_model(model_filename='ensemble_model.pkl'):
     """
@@ -245,7 +232,6 @@ def load_model(model_filename='ensemble_model.pkl'):
         print(f"An error occurred while loading the model: {e}")
         return None
 
-
 # Example usage
 if __name__ == "__main__":
     # Get the current date and create a date range for the last year (365 days)
@@ -255,15 +241,12 @@ if __name__ == "__main__":
     # Create the DataFrame with the date range from the last year
     df = pd.DataFrame({
         'Date': pd.date_range(start=start_date, end=end_date, freq='D'),
-        'Open': np.random.uniform(1000, 2000, 365),
-        'High': np.random.uniform(2000, 2500, 365),
-        'Low': np.random.uniform(800, 1000, 365),
-        'Close': np.random.uniform(1500, 2000, 365),
-        'Volume': np.random.randint(100000, 1000000, 365)  # Volume data for VWAP
+        'Close': pd.Series(range(365)),
+        'SMA_20': pd.Series(range(365)),
+        'EMA_20': pd.Series(range(365)),
+        'RSI': pd.Series(range(365)),
+        'MACD_12_26_9': pd.Series(range(365))
     })
-
-    # Add technical indicators
-    df = add_technical_indicators(df)
 
     # Load or train the model
     model = load_model('ensemble_model.pkl')
