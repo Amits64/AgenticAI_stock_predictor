@@ -32,6 +32,26 @@ def supertrend(df, period=10, multiplier=3.0):
             df.loc[i, 'supertrend'] = df['Close'][i] + multiplier * atr
     return df
 
+# Dynamic Position Sizing (Kelly Criterion)
+def kelly_position_size(df):
+    df['expected_return'] = df['strategy_return'].mean()
+    df['variance'] = df['strategy_return'].var()
+    df['kelly_fraction'] = df['expected_return'] / df['variance'] if df['variance'].iloc[0] != 0 else 0
+    df['kelly_position_size'] = df['kelly_fraction'] * df['portfolio_value']
+    return df
+
+# Volatility Filter (ATR-based)
+def volatility_filter(df, atr_threshold=2.0):
+    df['atr'] = df['High'].rolling(window=14).max() - df['Low'].rolling(window=14).min()
+    df['volatility_filter'] = np.where(df['atr'] > atr_threshold, 0, 1)  # 0 means avoid trade
+    return df
+
+# Trailing Stop-Loss Calculation
+def trailing_stop(df, trail_pct=0.02):
+    df['stop_loss'] = df['Close'] * (1 - trail_pct)
+    df['take_profit'] = df['Close'] * (1 + trail_pct)
+    return df
+
 # Trading Strategy: Ichimoku Cloud + Supertrend
 def ichimoku_supertrend_strategy(df):
     df = ichimoku_cloud(df)
@@ -51,18 +71,34 @@ def ichimoku_supertrend_strategy(df):
 
     return df
 
-# Backtesting the Strategy
+# Backtesting the Strategy with Debugging Statements
 def backtest_strategy(df, initial_capital=10000, position_size=1, slippage=0.0001):
-    df = ichimoku_supertrend_strategy(df)
+    df = ichimoku_supertrend_strategy(df)  # Apply Ichimoku and Supertrend strategy
+
+    # Debugging: print columns to confirm signal column exists
+    print("Columns after Ichimoku and Supertrend strategy:", df.columns)
 
     # Calculate daily returns
     df['daily_return'] = df['Close'].pct_change()
 
+    # Debugging: Check the first few rows to ensure that the 'signal' column is present
+    print("First few rows of the DataFrame:", df.head())
+
+    # Ensure 'signal' column is available
+    if 'signal' not in df.columns:
+        raise ValueError("Missing 'signal' column. Ensure signal generation logic is correctly applied.")
+
     # Strategy return is the daily return when in position (shifted by 1 to avoid lookahead bias)
     df['strategy_return'] = df['daily_return'] * df['signal'].shift(1)
 
+    # Debugging: Check that strategy_return is calculated
+    print("First few rows with strategy_return:", df[['Date', 'signal', 'strategy_return']].head())
+
     # Cumulative strategy return
     df['cumulative_return'] = (1 + df['strategy_return']).cumprod() - 1
+
+    # Debugging: Check the cumulative return
+    print("First few rows with cumulative_return:", df[['Date', 'cumulative_return']].head())
 
     # Add Portfolio value assuming an initial capital
     df['portfolio_value'] = initial_capital * (1 + df['strategy_return']).cumprod()
