@@ -1,9 +1,10 @@
 from binance.client import Client
 import pandas as pd
+from config import Config
 
 # You will need your Binance API Key and Secret for this
-api_key = 'FpmgOpAE2bez7ct136mQVPdRt6lbanMnuDK54iqP0l928bQ13pAN5VPKuqH71XK4'
-api_secret = 'KWmXhMKxAvkofRbrsOrLusKLB351t6kBBAKzHDlOFd53y2uNnX88vtj73czZls3j'
+api_key = Config.BINANCE_API_KEY
+api_secret = Config.BINANCE_API_SECRET
 client = Client(api_key, api_secret)
 
 
@@ -19,21 +20,15 @@ def fetch_historical_data(symbol='BTCUSDT', days=1825, interval='1d'):
                                        'Quote_asset_volume', 'Number_of_trades', 'Taker_buy_base_asset_volume',
                                        'Taker_buy_quote_asset_volume', 'Ignore'])
 
-    # Convert the timestamp to datetime and set 'Date' as the index
+    # Convert the timestamp to datetime and drop unnecessary columns
     df['Date'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('Date', inplace=True)  # Set the 'Date' column as the index
-
-    # Include 'Volume' in the final DataFrame
-    df = df[['Open', 'High', 'Low', 'Close', 'Volume']]  # Include 'Volume' column
+    df = df[['Date', 'Open', 'High', 'Low', 'Close']]
 
     # Convert numerical columns to float
-    df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].astype(float)
-
-    # Verify 'Volume' is present and valid
-    if 'Volume' not in df.columns or df['Volume'].isnull().any():
-        raise ValueError("The 'Volume' column is missing or contains null values in the fetched data.")
+    df[['Open', 'High', 'Low', 'Close']] = df[['Open', 'High', 'Low', 'Close']].astype(float)
 
     return df
+
 
 def fetch_real_time_data(symbol='BTCUSDT'):
     """
@@ -53,15 +48,10 @@ def fetch_real_time_data(symbol='BTCUSDT'):
 
 # Example usage
 if __name__ == "__main__":
-    try:
-        # Fetch historical data for the last 365 days
-        df = fetch_historical_data(symbol='BTCUSDT', days=1825, interval='1d')
-        print("Historical Data:")
-        print(df.head())
+    # Fetch historical data for the last 365 days
+    df = fetch_historical_data(symbol='BTCUSDT', days=1825, interval='1d')
+    print(df.head())
 
-        # Fetch real-time data
-        real_time_data = fetch_real_time_data(symbol='BTCUSDT')
-        print("\nReal-Time Data:")
-        print(real_time_data)
-    except Exception as e:
-        print(f"Error: {str(e)}")
+    # Fetch real-time data
+    real_time_data = fetch_real_time_data(symbol='BTCUSDT')
+    print(real_time_data)

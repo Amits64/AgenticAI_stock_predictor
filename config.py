@@ -1,7 +1,5 @@
-# config.py
-import os
 class Config:
-   SYMBOL = os.getenv("SYMBOL", "BTC")
-   DATA_PERIOD = os.getenv("DATA_PERIOD", "1y")
-   DATA_INTERVAL = os.getenv("DATA_INTERVAL", "1d")
-   SECRET_KEY = os.getenv("SECRET_KEY", "CG-kKmhm8Kman67faEfbLVbJdgz")
+   COINGECKO_SECRET_KEY = "CG-kKmhm8Kman67faEfbLVbJdgz"
+   BINANCE_API_KEY = 'FpmgOpAE2bez7ct136mQVPdRt6lbanMnuDK54iqP0l928bQ13pAN5VPKuqH71XK4'
+   BINANCE_API_SECRET = 'KWmXhMKxAvkofRbrsOrLusKLB351t6kBBAKzHDlOFd53y2uNnX88vtj73czZls3j'
+   OPENAI_API_KEY = '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'
