@@ -1,129 +1,79 @@
-⸻
+# AgenticAI Crypto Coin Price Predictor
 
-AgenticAI Crypto Coin Price Predictor
+AgenticAI is a sophisticated and reliable crypto coin price predictor that leverages advanced machine learning models to predict the next day's closing price of various cryptocurrencies. It also provides risk management insights, including dynamic stop-loss/take-profit levels, position sizing, and risk-to-reward ratios.
 
-AgenticAI is a sophisticated and reliable cryptocurrency price predictor that leverages advanced machine learning models to forecast the next day’s closing price of various cryptocurrencies. It also provides in-depth risk management insights, including dynamic stop-loss/take-profit levels, position sizing, and risk-to-reward ratios.
+## Features
 
-⸻
+- **Data Fetching**: Fetch historical data for various cryptocurrencies.
+- **Technical Analysis**: Add technical indicators such as SMA, EMA, RSI, MACD, and more.
+- **Price Prediction**: Predict the next day's closing price using an ensemble of models.
+- **Backtesting**: Backtest trading strategies and visualize the results.
+- **Risk Management**: Provide advanced risk management insights, including support/resistance levels, ATR, and position sizing.
+- **Report Generation**: Generate comprehensive reports with visualizations.
 
-Features
+## Installation
 
-✅ Data Fetching: Fetch historical cryptocurrency data using APIs.
-✅ Technical Analysis: Apply key indicators such as SMA, EMA, RSI, MACD, Bollinger Bands, ATR, and more.
-✅ AI-Powered Price Prediction: Predict the next day’s closing price using an ensemble of machine learning models.
-✅ Backtesting: Backtest trading strategies and visualize performance metrics.
-✅ Risk Management: Get detailed insights, including support/resistance levels, ATR-based stop-loss, and dynamic position sizing.
-✅ Comprehensive Report Generation: Generate interactive reports with visual analytics.
-
-⸻
-
-Installation
-
-1. Clone the Repository
-
-git clone https://github.com/yourusername/AgenticAI_stock_predictor.git
-cd AgenticAI_stock_predictor
-
-2. Create a Virtual Environment and Activate It
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/AgenticAI_stock_predictor.git
+   cd AgenticAI_stock_predictor
+Create a virtual environment and activate it:
 
 python -m venv venv
 source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-
-3. Install Required Dependencies
+Install the required dependencies:
 
 pip install -r requirements.txt
-
-
-
-⸻
-
 Usage
-
-Step 1: Train the AI Model (Must Be Done First)
-
-Before making predictions, you must train the AI model by executing the following command:
-
-python train_model.py
-
-This step generates the machine learning model that will be used by other scripts for price prediction.
-
-Step 2: Run the Flask Web App
-
-Once the model is trained, start the Flask application:
+Run the Flask App:
 
 python app.py
+Access the Web Interface: Open your web browser and go to http://127.0.0.1:5000/.
 
-Now, open your web browser and visit: http://127.0.0.1:5000/
+Fetch Data: Enter the symbol of the cryptocurrency (e.g., bitcoin) and click on "Fetch Data" to retrieve historical data.
 
-Step 3: Fetch Historical Data
-	•	Enter the cryptocurrency symbol (e.g., bitcoin, ethereum) and click on “Fetch Data” to retrieve historical price data.
+Perform Technical Analysis: Click on "Technical Analysis" to add technical indicators to the fetched data.
 
-Step 4: Perform Technical Analysis
-	•	Click on “Technical Analysis” to apply key indicators to the fetched data.
+Predict Price: Click on "Predict" to predict the next day's closing price using the ensemble model.
 
-Step 5: Predict the Next Day’s Price
-	•	Click on “Predict” to use the trained AI model and forecast the next day’s closing price.
+Backtest Strategy: Click on "Backtest" to backtest the trading strategy and visualize the results.
 
-Step 6: Backtest Trading Strategies
-	•	Click on “Backtest” to evaluate trading strategies and visualize their past performance.
+Risk Analysis: Click on "Risk Analysis" to get advanced risk management insights.
 
-Step 7: Risk Analysis & Insights
-	•	Click on “Risk Analysis” to generate stop-loss levels, position sizing, and risk-to-reward calculations.
-
-Step 8: Generate a Full Report
-	•	Click on “Generate Report” to export a complete visual analysis of predictions, strategies, and insights.
-
-⸻
+Generate Report: Click on "Generate Report" to generate a comprehensive report with visualizations.
 
 Project Structure
+app.py: Main Flask application file.
+data_fetcher.py: Module for fetching historical data.
+technical_analysis.py: Module for adding technical indicators.
+ai_model.py: Module for training and predicting prices using machine learning models.
+backtesting.py: Module for backtesting trading strategies.
+risk_management.py: Module for providing risk management insights.
+reports.py: Module for generating reports.
+templates/index.html: HTML template for the web interface.
+requirements.txt: List of required dependencies.
 
-AgenticAI_stock_predictor/
-│── app.py                 # Main Flask application file
-│── train_model.py         # Script to train the AI model (must run first)
-│── data_fetcher.py        # Module for fetching historical data
-│── technical_analysis.py  # Module for adding technical indicators
-│── ai_model.py            # Core AI model for price prediction
-│── backtesting.py         # Backtesting module for trading strategies
-│── risk_management.py     # Module for risk analysis and position sizing
-│── reports.py             # Generates detailed reports with visualizations
-│── templates/index.html   # HTML template for the web interface
-│── requirements.txt       # List of required dependencies
-└── README.md              # Documentation
-
-
-
-⸻
-
-Screenshots
-
-
-⸻
+Screenshots:
+![image](https://github.com/user-attachments/assets/1ed6a366-0a85-4e5d-9035-5340c4dd4229)
+![image](https://github.com/user-attachments/assets/20366214-1f82-474c-9d4f-dce457b908b2)
+![image](https://github.com/user-attachments/assets/f1df5b0c-3291-41c8-acfa-c27fecd28d4e)
+![image](https://github.com/user-attachments/assets/d5856749-c430-40fc-b718-d2c3c24433b9)
+![image](https://github.com/user-attachments/assets/7b5425a2-96c1-4066-875d-998755d2247b)
 
 Contributing
-
-Contributions are welcome! If you have ideas for improvements or bug fixes, feel free to open an issue or submit a pull request.
-
-⸻
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
 License
-
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-⸻
-
-Acknowledgments
-	•	XGBoost
-	•	Scikit-Learn
-	•	Pandas
-	•	Flask
-	•	Matplotlib
-	•	mplfinance
-
-⸻
-
+Acknowledgements
+XGBoost
+Scikit-Learn
+Pandas
+Flask
+Matplotlib
+mplfinance
 Contact
-
-For any questions or inquiries, please reach out to: chauhanamit090@hotmail.com
+For any questions or inquiries, please contact [chauhanamit090@hotmail.com].
 
 Happy Predicting! 🚀
-
