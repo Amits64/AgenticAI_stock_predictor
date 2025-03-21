@@ -1,57 +1,89 @@
 from binance.client import Client
 import pandas as pd
+import matplotlib.pyplot as plt
+import io
+import base64
 from config import Config
+import matplotlib
+matplotlib.use('Agg')  # Use non-GUI backend
 
-# You will need your Binance API Key and Secret for this
-api_key = Config.BINANCE_API_KEY
-api_secret = Config.BINANCE_API_SECRET
-client = Client(api_key, api_secret)
+class BinanceHistoricalData:
+    """ Fetch historical data from Binance """
+    def __init__(self, api_key, api_secret, symbol='BTCUSDT', days=1825, interval='1d'):
+        self.client = Client(api_key, api_secret)
+        self.symbol = symbol
+        self.days = days
+        self.interval = interval
+        self.df = pd.DataFrame()
+
+    def fetch_historical_data(self):
+        """ Fetch crypto data from Binance and convert to DataFrame """
+        try:
+            klines = self.client.get_historical_klines(self.symbol, self.interval, f"{self.days} day ago UTC")
+
+            # Convert to DataFrame
+            df = pd.DataFrame(klines, columns=[
+                'timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Close_time',
+                'Quote_asset_volume', 'Number_of_trades', 'Taker_buy_base_asset_volume',
+                'Taker_buy_quote_asset_volume', 'Ignore'
+            ])
+
+            # Format DataFrame
+            df['Date'] = pd.to_datetime(df['timestamp'], unit='ms')
+            df = df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
+
+            # Convert to float
+            df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].astype(float)
+
+            # Add synthetic volume if missing
+            if df['Volume'].isnull().all():
+                print("⚠️ Missing volume data. Adding synthetic volume.")
+                df['Volume'] = pd.Series(pd.np.random.randint(1000, 10000, size=len(df)))
+
+            self.df = df
+            df.to_csv("raw_data.csv", index=False)
+            print(f"✅ Data saved to raw_data.csv with {len(df)} rows")
+            return df
+
+        except Exception as e:
+            print(f"❌ Error fetching data: {e}")
+            return pd.DataFrame()
+
+    def generate_plot_url(self):
+        """ Generate base64 URL for the plot """
+        if self.df.empty:
+            print("⚠️ No data available for plotting.")
+            return ""
+
+        plt.ioff()  # Disable interactive mode
+        plt.figure(figsize=(14, 6))
+        plt.style.use("seaborn-v0_8")
+        plt.plot(self.df['Date'], self.df['Close'], label='Close Price', color='blue')
+        plt.title(f'Historical Close Price for {self.symbol}')
+        plt.xlabel('Date')
+        plt.ylabel('Close Price')
+        plt.grid(True)
+        plt.legend()
+
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+
+        plot_url = base64.b64encode(img.getvalue()).decode()
+        plt.close()
+
+        return f"data:image/png;base64,{plot_url}"
 
 
-def fetch_historical_data(symbol='BTCUSDT', days=1825, interval='1d'):
-    """
-    Fetch historical crypto data from Binance.
-    """
-    # Fetch historical kline data from Binance API
-    klines = client.get_historical_klines(symbol, interval, f"{days} day ago UTC")
-
-    # Convert data to pandas DataFrame
-    df = pd.DataFrame(klines, columns=['timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Close_time',
-                                       'Quote_asset_volume', 'Number_of_trades', 'Taker_buy_base_asset_volume',
-                                       'Taker_buy_quote_asset_volume', 'Ignore'])
-
-    # Convert the timestamp to datetime and drop unnecessary columns
-    df['Date'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df = df[['Date', 'Open', 'High', 'Low', 'Close']]
-
-    # Convert numerical columns to float
-    df[['Open', 'High', 'Low', 'Close']] = df[['Open', 'High', 'Low', 'Close']].astype(float)
-
-    return df
-
-
-def fetch_real_time_data(symbol='BTCUSDT'):
-    """
-    Fetch real-time crypto data from Binance.
-    """
-    ticker = client.get_symbol_ticker(symbol=symbol)
-    ticker_24hr = client.get_ticker(symbol=symbol)
-
-    return {
-        "price": float(ticker['price']),
-        "market_cap": "Not available directly from Binance",  # Binance does not provide market cap directly
-        "high_24h": float(ticker_24hr['highPrice']),
-        "low_24h": float(ticker_24hr['lowPrice']),
-        "last_updated": pd.to_datetime(ticker_24hr['closeTime'], unit='ms')
-    }
-
-
-# Example usage
+# ---------------------------
+# 🚀 Main Execution
+# ---------------------------
 if __name__ == "__main__":
-    # Fetch historical data for the last 365 days
-    df = fetch_historical_data(symbol='BTCUSDT', days=1825, interval='1d')
-    print(df.head())
+    api_key = Config.BINANCE_API_KEY
+    api_secret = Config.BINANCE_API_SECRET
 
-    # Fetch real-time data
-    real_time_data = fetch_real_time_data(symbol='BTCUSDT')
-    print(real_time_data)
+    fetcher = BinanceHistoricalData(api_key, api_secret, symbol='BTCUSDT', days=1825, interval='1d')
+    fetcher.fetch_historical_data()
+
+    fetch_url = fetcher.generate_plot_url()
+    print(f"✅ Plot URL: {fetch_url}")
