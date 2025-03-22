@@ -33,15 +33,14 @@ def fetch_data():
     symbol = request.args.get('symbol', 'BTCUSDT')
     days = int(request.args.get('days', '365'))
     interval = request.args.get('interval', '1d')
-    source = request.args.get('source', 'binance').lower()  # new parameter to select data source
+    source = request.args.get('source', 'binance').lower()
 
     valid_intervals = ['1m', '3m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1d', '3d', '1w', '1M']
     if interval not in valid_intervals:
         return jsonify({"error": f"Invalid interval. Valid intervals are: {', '.join(valid_intervals)}."}), 400
+
     try:
         if source == 'yfinance':
-            period = f"{days}d"  # use days as period for yfinance
-
             # Map common lowercase names to valid yfinance tickers.
             mapping = {
                 'bitcoin': 'BTC-USD',
@@ -50,10 +49,21 @@ def fetch_data():
             }
             if symbol.lower() in mapping:
                 symbol = mapping[symbol.lower()]
-            elif symbol.endswith("USDT"):
-                # Convert symbols like ADA-USDT or BTCUSDT to ADA-USD or BTC-USD
-                symbol = symbol.replace("USDT", "USD")
+            elif "USDT" in symbol.upper():
+                # Convert symbols like "BTC-USDT" or "BTCUSDT" to "BTC-USD"
+                symbol = symbol.upper().replace("USDT", "USD")
+
+            # First, try with period derived from the days parameter (e.g., "1825d")
+            period = f"{days}d"
             fetcher = YFinanceHistoricalData(symbol=symbol, period=period, interval=interval)
+            df = fetcher.fetch_historical_data()
+
+            # Fallback: if no data, then try with period "max"
+            if df.empty:
+                print("No data returned with period", period, "- trying period 'max'")
+                fetcher.period = "max"
+                df = fetcher.fetch_historical_data()
+
         else:
             fetcher = BinanceHistoricalData(
                 Config.BINANCE_API_KEY,
@@ -62,9 +72,13 @@ def fetch_data():
                 days=days,
                 interval=interval
             )
-        df = fetcher.fetch_historical_data()
+            df = fetcher.fetch_historical_data()
+
         if df.empty:
-            return jsonify({"error": "No data returned."}), 500
+            error_msg = f"Yahoo Finance returned no data for symbol '{symbol}' using period '{fetcher.period}' and interval '{interval}'. Please verify that the ticker is correct and available on Yahoo Finance."
+            print("❌", error_msg)
+            return jsonify({"error": error_msg}), 500
+
         data_cache[symbol] = df
         fetch_url = fetcher.generate_plot_url()
         return jsonify({

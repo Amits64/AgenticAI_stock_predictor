@@ -1,4 +1,3 @@
-# data_fetcher.py
 from binance.client import Client
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -22,31 +21,25 @@ class BinanceHistoricalData:
         """Fetch crypto data from Binance and convert to DataFrame"""
         try:
             klines = self.client.get_historical_klines(self.symbol, self.interval, f"{self.days} day ago UTC")
-
             # Convert to DataFrame
             df = pd.DataFrame(klines, columns=[
                 'timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Close_time',
                 'Quote_asset_volume', 'Number_of_trades', 'Taker_buy_base_asset_volume',
                 'Taker_buy_quote_asset_volume', 'Ignore'
             ])
-
             # Format DataFrame
             df['Date'] = pd.to_datetime(df['timestamp'], unit='ms')
             df = df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
-
             # Convert to float
             df[['Open', 'High', 'Low', 'Close', 'Volume']] = df[['Open', 'High', 'Low', 'Close', 'Volume']].astype(float)
-
             # Add synthetic volume if missing
             if df['Volume'].isnull().all():
                 print("⚠️ Missing volume data. Adding synthetic volume.")
                 df['Volume'] = pd.Series(pd.np.random.randint(1000, 10000, size=len(df)))
-
             self.df = df
             df.to_csv("raw_data.csv", index=False)
             print(f"✅ Data saved to raw_data.csv with {len(df)} rows")
             return df
-
         except Exception as e:
             print(f"❌ Error fetching data: {e}")
             return pd.DataFrame()
@@ -56,7 +49,6 @@ class BinanceHistoricalData:
         if self.df.empty:
             print("⚠️ No data available for plotting.")
             return ""
-
         plt.ioff()  # Disable interactive mode
         plt.figure(figsize=(14, 6))
         plt.style.use("seaborn-v0_8")
@@ -66,14 +58,11 @@ class BinanceHistoricalData:
         plt.ylabel('Close Price')
         plt.grid(True)
         plt.legend()
-
         img = io.BytesIO()
         plt.savefig(img, format='png')
         img.seek(0)
-
         plot_url = base64.b64encode(img.getvalue()).decode()
         plt.close()
-
         return f"data:image/png;base64,{plot_url}"
 
 
@@ -89,6 +78,10 @@ class YFinanceHistoricalData:
         """Fetch crypto data from Yahoo Finance and convert to DataFrame"""
         try:
             df = yf.download(self.symbol, period=self.period, interval=self.interval)
+            # Fallback: if no data returned, try a longer period (e.g., 5y)
+            if df.empty:
+                print("⚠️ No data returned with period", self.period, "- trying 5y period.")
+                df = yf.download(self.symbol, period="5y", interval=self.interval)
             df.reset_index(inplace=True)
             # Ensure a Date column exists
             if 'Date' not in df.columns:
@@ -115,35 +108,42 @@ class YFinanceHistoricalData:
         plt.ylabel('Close Price')
         plt.grid(True)
         plt.legend()
-
         img = io.BytesIO()
         plt.savefig(img, format='png')
         img.seek(0)
         plot_url = base64.b64encode(img.getvalue()).decode()
         plt.close()
-
         return f"data:image/png;base64,{plot_url}"
 
 
-# ---------------------------
-# 🚀 Main Execution (for testing purposes)
-# ---------------------------
-if __name__ == "__main__":
+# Separate main functions for testing
+def main_binance():
     api_key = Config.BINANCE_API_KEY
     api_secret = Config.BINANCE_API_SECRET
-
-    # Example usage for Binance
     print("=== Binance Data Fetch ===")
     fetcher_binance = BinanceHistoricalData(api_key, api_secret, symbol='BTCUSDT', days=1825, interval='1d')
-    fetcher_binance.fetch_historical_data()
-    fetch_url_binance = fetcher_binance.generate_plot_url()
-    print(f"✅ Binance Plot URL: {fetch_url_binance}")
+    df = fetcher_binance.fetch_historical_data()
+    if not df.empty:
+        fetch_url_binance = fetcher_binance.generate_plot_url()
+        print(f"✅ Binance Plot URL: {fetch_url_binance}")
+    else:
+        print("❌ No data fetched from Binance.")
 
-    # Example usage for Yahoo Finance
+def main_yfinance():
     print("=== Yahoo Finance Data Fetch ===")
-    # Adjust symbol format if needed (e.g., BTCUSDT -> BTC-USD)
-    yf_symbol = "BTC-USD"
-    fetcher_yf = YFinanceHistoricalData(symbol=yf_symbol, period="1825d", interval='1d')
-    fetcher_yf.fetch_historical_data()
-    fetch_url_yf = fetcher_yf.generate_plot_url()
-    print(f"✅ Yahoo Finance Plot URL: {fetch_url_yf}")
+    yf_symbol = "BTC-USD"  # or any other symbol you wish to test
+    fetcher_yf = YFinanceHistoricalData(symbol=yf_symbol, period="365", interval='1d')
+    df = fetcher_yf.fetch_historical_data()
+    if not df.empty:
+        fetch_url_yf = fetcher_yf.generate_plot_url()
+        print(f"✅ Yahoo Finance Plot URL: {fetch_url_yf}")
+    else:
+        print("❌ No data fetched from Yahoo Finance.")
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1].lower() == "yfinance":
+        main_yfinance()
+    else:
+        main_binance()
