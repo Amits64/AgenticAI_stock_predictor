@@ -1,14 +1,16 @@
+# data_fetcher.py
 from binance.client import Client
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
 import base64
+import yfinance as yf
 from config import Config
 import matplotlib
 matplotlib.use('Agg')  # Use non-GUI backend
 
 class BinanceHistoricalData:
-    """ Fetch historical data from Binance """
+    """Fetch historical data from Binance"""
     def __init__(self, api_key, api_secret, symbol='BTCUSDT', days=1825, interval='1d'):
         self.client = Client(api_key, api_secret)
         self.symbol = symbol
@@ -17,7 +19,7 @@ class BinanceHistoricalData:
         self.df = pd.DataFrame()
 
     def fetch_historical_data(self):
-        """ Fetch crypto data from Binance and convert to DataFrame """
+        """Fetch crypto data from Binance and convert to DataFrame"""
         try:
             klines = self.client.get_historical_klines(self.symbol, self.interval, f"{self.days} day ago UTC")
 
@@ -50,7 +52,7 @@ class BinanceHistoricalData:
             return pd.DataFrame()
 
     def generate_plot_url(self):
-        """ Generate base64 URL for the plot """
+        """Generate base64 URL for the plot"""
         if self.df.empty:
             print("⚠️ No data available for plotting.")
             return ""
@@ -75,15 +77,73 @@ class BinanceHistoricalData:
         return f"data:image/png;base64,{plot_url}"
 
 
+class YFinanceHistoricalData:
+    """Fetch historical data from Yahoo Finance"""
+    def __init__(self, symbol='BTC-USD', period='5y', interval='1d'):
+        self.symbol = symbol
+        self.period = period
+        self.interval = interval
+        self.df = pd.DataFrame()
+
+    def fetch_historical_data(self):
+        """Fetch crypto data from Yahoo Finance and convert to DataFrame"""
+        try:
+            df = yf.download(self.symbol, period=self.period, interval=self.interval)
+            df.reset_index(inplace=True)
+            # Ensure a Date column exists
+            if 'Date' not in df.columns:
+                df.rename(columns={'index': 'Date'}, inplace=True)
+            self.df = df
+            df.to_csv("raw_data_yf.csv", index=False)
+            print(f"✅ Data saved to raw_data_yf.csv with {len(df)} rows")
+            return df
+        except Exception as e:
+            print(f"❌ Error fetching data from Yahoo Finance: {e}")
+            return pd.DataFrame()
+
+    def generate_plot_url(self):
+        """Generate base64 URL for the plot"""
+        if self.df.empty:
+            print("⚠️ No data available for plotting.")
+            return ""
+        plt.ioff()  # Disable interactive mode
+        plt.figure(figsize=(14, 6))
+        plt.style.use("seaborn-v0_8")
+        plt.plot(self.df['Date'], self.df['Close'], label='Close Price', color='blue')
+        plt.title(f'Historical Close Price for {self.symbol}')
+        plt.xlabel('Date')
+        plt.ylabel('Close Price')
+        plt.grid(True)
+        plt.legend()
+
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plot_url = base64.b64encode(img.getvalue()).decode()
+        plt.close()
+
+        return f"data:image/png;base64,{plot_url}"
+
+
 # ---------------------------
-# 🚀 Main Execution
+# 🚀 Main Execution (for testing purposes)
 # ---------------------------
 if __name__ == "__main__":
     api_key = Config.BINANCE_API_KEY
     api_secret = Config.BINANCE_API_SECRET
 
-    fetcher = BinanceHistoricalData(api_key, api_secret, symbol='BTCUSDT', days=1825, interval='1d')
-    fetcher.fetch_historical_data()
+    # Example usage for Binance
+    print("=== Binance Data Fetch ===")
+    fetcher_binance = BinanceHistoricalData(api_key, api_secret, symbol='BTCUSDT', days=1825, interval='1d')
+    fetcher_binance.fetch_historical_data()
+    fetch_url_binance = fetcher_binance.generate_plot_url()
+    print(f"✅ Binance Plot URL: {fetch_url_binance}")
 
-    fetch_url = fetcher.generate_plot_url()
-    print(f"✅ Plot URL: {fetch_url}")
+    # Example usage for Yahoo Finance
+    print("=== Yahoo Finance Data Fetch ===")
+    # Adjust symbol format if needed (e.g., BTCUSDT -> BTC-USD)
+    yf_symbol = "BTC-USD"
+    fetcher_yf = YFinanceHistoricalData(symbol=yf_symbol, period="1825d", interval='1d')
+    fetcher_yf.fetch_historical_data()
+    fetch_url_yf = fetcher_yf.generate_plot_url()
+    print(f"✅ Yahoo Finance Plot URL: {fetch_url_yf}")

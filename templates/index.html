@@ -83,6 +83,11 @@
       top: 120px;
       z-index: 1000;
     }
+    .circular-btn-container {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
     .circular-btn {
       width: 50px;
       height: 50px;
@@ -93,7 +98,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 10px 0;
       transition: transform 0.3s, background-color 0.3s;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       cursor: pointer;
@@ -101,6 +105,11 @@
     .circular-btn:hover {
       transform: scale(1.1);
       background-color: #0097a7;
+    }
+    .btn-label {
+      margin-left: 8px;
+      font-size: 14px;
+      font-weight: 600;
     }
     /* Global Loader Overlay */
     #loader-overlay {
@@ -181,29 +190,47 @@
     <p>© 2025 Agentic AI All Rights Reserved</p>
   </footer>
 
-  <!-- Circular Button Section -->
+  <!-- Circular Button Section with Colorful Titles -->
   <div class="circular-btns">
-    <div class="circular-btn" onclick="openSymbolModal()">
-      <i class="fas fa-download"></i>
+    <div class="circular-btn-container">
+      <div class="circular-btn" onclick="openSymbolModal()">
+        <i class="fas fa-download"></i>
+      </div>
+      <span class="btn-label" style="color:#f44336;">Fetch Data</span>
     </div>
-    <div class="circular-btn" onclick="technicalAnalysis()">
-      <i class="fas fa-chart-line"></i>
+    <div class="circular-btn-container">
+      <div class="circular-btn" onclick="technicalAnalysis()">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <span class="btn-label" style="color:#3f51b5;">Technical Analysis</span>
     </div>
-    <div class="circular-btn" onclick="predict()">
-      <i class="fas fa-rocket"></i>
+    <div class="circular-btn-container">
+      <div class="circular-btn" onclick="predict()">
+        <i class="fas fa-rocket"></i>
+      </div>
+      <span class="btn-label" style="color:#4caf50;">Predict</span>
     </div>
-    <div class="circular-btn" onclick="openBacktestModal()">
-      <i class="fas fa-history"></i>
+    <div class="circular-btn-container">
+      <div class="circular-btn" onclick="openBacktestModal()">
+        <i class="fas fa-history"></i>
+      </div>
+      <span class="btn-label" style="color:#ff9800;">Backtest</span>
     </div>
-    <div class="circular-btn" onclick="riskAnalysis()">
-      <i class="fas fa-exclamation-triangle"></i>
+    <div class="circular-btn-container">
+      <div class="circular-btn" onclick="riskAnalysis()">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <span class="btn-label" style="color:#9c27b0;">Risk Analysis</span>
     </div>
-    <div class="circular-btn" onclick="generateReport()">
-      <i class="fas fa-file-alt"></i>
+    <div class="circular-btn-container">
+      <div class="circular-btn" onclick="generateReport()">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <span class="btn-label" style="color:#00bcd4;">Generate Report</span>
     </div>
   </div>
 
-  <!-- Modal for Entering Symbol -->
+  <!-- Modal for Entering Symbol & Selecting Data Source -->
   <div class="modal fade" id="symbolModal" tabindex="-1" aria-labelledby="symbolModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-light text-dark">
@@ -215,8 +242,15 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="modalSymbolInput">Symbol (e.g., BTCUSDT):</label>
+            <label for="modalSymbolInput">Symbol (e.g., BTCUSDT or BTC-USD):</label>
             <input type="text" id="modalSymbolInput" class="form-control" placeholder="Enter symbol" />
+          </div>
+          <div class="form-group">
+            <label for="dataSourceSelect">Data Source:</label>
+            <select id="dataSourceSelect" class="form-control">
+              <option value="binance">Binance</option>
+              <option value="yfinance">Yahoo Finance</option>
+            </select>
           </div>
         </div>
         <div class="modal-footer">
@@ -305,6 +339,7 @@
 
     function fetchData() {
       const symbol = $("#modalSymbolInput").val();
+      const dataSource = $("#dataSourceSelect").val();
       if (!symbol) {
         alert("Please enter a symbol.");
         return;
@@ -313,7 +348,7 @@
       $("#symbolModal").modal("hide");
       showGlobalLoader();
       setTimeout(function() {
-        $.get(`/fetch_data?symbol=${symbol}`, function(data) {
+        $.get(`/fetch_data?symbol=${symbol}&source=${dataSource}`, function(data) {
           hideGlobalLoader();
           console.log("Fetch Data Response:", data);
           $("#resultsModal").modal("show");
