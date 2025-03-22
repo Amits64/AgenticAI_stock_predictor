@@ -5,7 +5,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from risk_management import risk_analysis
-
+from data_fetcher import BinanceHistoricalData
+from config import Config
 
 def add_moving_averages(df):
     """
@@ -15,7 +16,6 @@ def add_moving_averages(df):
     df['SMA_50'] = df['Close'].rolling(window=50).mean()
     df['EMA_20'] = df['Close'].ewm(span=20, adjust=False).mean()
     return df
-
 
 def calculate_rsi(df, window=14):
     """
@@ -31,7 +31,6 @@ def calculate_rsi(df, window=14):
     rs = avg_gain / avg_loss
     df['RSI'] = 100 - (100 / (1 + rs))
     return df
-
 
 def plot_fibonacci(df):
     """
@@ -51,7 +50,6 @@ def plot_fibonacci(df):
     }
 
     return levels
-
 
 def plot_interactive_chart(df, filename="interactive_report.html"):
     """
@@ -84,8 +82,8 @@ def plot_interactive_chart(df, filename="interactive_report.html"):
         open=df['Open'], high=df['High'],
         low=df['Low'], close=df['Close'],
         name='Candlestick',
-        increasing=dict(line=dict(color='#1E8449')),  # Green for up
-        decreasing=dict(line=dict(color='#E74C3C')),  # Red for down
+        increasing=dict(line=dict(color='#1E8449')),
+        decreasing=dict(line=dict(color='#E74C3C')),
         showlegend=False
     ), row=1, col=1)
 
@@ -146,7 +144,6 @@ def plot_interactive_chart(df, filename="interactive_report.html"):
     fig.write_html(filename)
     return filename
 
-
 def generate_report(df, filename="full_report.html"):
     try:
         # Ensure the static directory exists
@@ -163,27 +160,24 @@ def generate_report(df, filename="full_report.html"):
 
         return {"report_file": f"/static/{filename}"}
     except Exception as e:
-        # Handle errors gracefully
         return {"error": str(e)}
 
-
-# Example Usage
+# Example Usage using real data fetched from data_fetcher.py
 if __name__ == "__main__":
-    # Generate date range for the last 1 year
-    end_date = datetime.today()
-    start_date = end_date - timedelta(days=365)
+    # Use BinanceHistoricalData to fetch real historical data (e.g., for BTCUSDT over the past year)
+    fetcher = BinanceHistoricalData(
+        Config.BINANCE_API_KEY,
+        Config.BINANCE_API_SECRET,
+        symbol="BTCUSDT",
+        days=365,
+        interval="1d"
+    )
+    df = fetcher.fetch_historical_data()
 
-    # Create a dummy dataframe for testing with the new date range
-    dates = pd.date_range(start=start_date, end=end_date, freq='D')
-    data = {
-        'Date': dates,
-        'Open': np.random.uniform(1000, 2000, len(dates)),
-        'High': np.random.uniform(2000, 2500, len(dates)),
-        'Low': np.random.uniform(800, 1000, len(dates)),
-        'Close': np.random.uniform(1500, 2000, len(dates)),
-    }
-    df = pd.DataFrame(data)
+    # Ensure that 'Date' is a column
+    if "Date" not in df.columns:
+        df = df.reset_index()
 
-    # Generate report
+    # Generate the interactive report using the fetched data
     result = generate_report(df)
-    print(f"Interactive report saved as: {result['report_file']}")
+    print(f"Interactive report saved as: {result.get('report_file', result)}")
