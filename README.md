@@ -54,11 +54,16 @@ templates/index.html: HTML template for the web interface.
 requirements.txt: List of required dependencies.
 
 Screenshots:
-![image](https://github.com/user-attachments/assets/1ed6a366-0a85-4e5d-9035-5340c4dd4229)
-![image](https://github.com/user-attachments/assets/20366214-1f82-474c-9d4f-dce457b908b2)
-![image](https://github.com/user-attachments/assets/f1df5b0c-3291-41c8-acfa-c27fecd28d4e)
-![image](https://github.com/user-attachments/assets/d5856749-c430-40fc-b718-d2c3c24433b9)
-![image](https://github.com/user-attachments/assets/7b5425a2-96c1-4066-875d-998755d2247b)
+![image](https://github.com/user-attachments/assets/8b1a172c-2612-4b82-b517-3dafd62bd51e)
+![image](https://github.com/user-attachments/assets/b67d0692-3c66-4189-9bd2-655b2fce568d)
+![image](https://github.com/user-attachments/assets/07af15a4-c281-4eb6-9d81-3ce500f0bccc)
+![image](https://github.com/user-attachments/assets/4499f29a-a2fa-42fa-bbb5-4b98565f95d4)
+![image](https://github.com/user-attachments/assets/4bc3717f-0b53-40e2-9182-106648428432)
+![image](https://github.com/user-attachments/assets/a9b5dcb6-0590-4c44-a313-53b027b65724)
+![image](https://github.com/user-attachments/assets/cea79300-5ee5-4ca6-820b-f221ff3fc6c9)
+![image](https://github.com/user-attachments/assets/09be8b8b-2b31-4f00-8598-a12b934f68bf)
+![newplot (1)](https://github.com/user-attachments/assets/e3481427-b62c-4289-88b1-902b75312ca6)
+
 
 Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
