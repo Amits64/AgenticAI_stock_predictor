@@ -1,30 +1,45 @@
 # AgenticAI Crypto Coin Price Predictor
 
-##AgenticAI is a comprehensive and reliable crypto coin price predictor that leverages advanced machine learning models to forecast the next day’s closing price of various cryptocurrencies. Alongside predictive analytics, AgenticAI provides robust risk management insights, technical indicators, backtesting capabilities, and dynamic report generation.
+**AgenticAI** is a comprehensive and reliable crypto coin price predictor that leverages advanced machine learning models to forecast the next day’s closing price of various cryptocurrencies. Alongside predictive analytics, AgenticAI provides robust risk management insights, technical indicators, backtesting capabilities, and dynamic report generation.
 
-Key Features
-	1.	##Data Fetching
-	•	Fetch historical data from multiple sources, including Binance and Yahoo Finance (yfinance).
-	•	Specify your desired cryptocurrency symbol (e.g., BTCUSDT, ETHUSDT, BTC-USD, etc.).
-	2.	##Technical Analysis
-	•	Add popular technical indicators such as SMA, EMA, RSI, MACD, Bollinger Bands, and more.
-	•	Easily view the indicator data and incorporate it into backtesting or predictions.
-	3.	##Price Prediction
-	•	Predict next-day closing prices using an ensemble of machine learning models.
-	•	Leverage advanced architectures, including LSTM, XGBoost, and ensemble stacking for more accurate forecasts.
-	4.	##Backtesting
-	•	Run backtests on built-in or custom trading strategies.
-	•	View performance metrics such as Sharpe Ratio, Max Drawdown, and cumulative returns.
-	5.	##Risk Management
-	•	Get support/resistance levels, dynamic stop-loss/take-profit calculations, ATR (Average True Range), and recommended position sizing.
-	•	Monitor your risk-to-reward ratios for more informed decision-making.
-	6.	##Report Generation
-	•	Generate comprehensive reports with visualizations, including Fibonacci retracement, candlestick charts, and risk analysis overlays.
-	•	Export these reports in interactive HTML format for easy sharing.
-	7.	##User-Friendly UI
-	•	A dynamic table logs each action (e.g., Fetch Data, Predict, Backtest) with timestamps, details, and optional embedded charts.
-	•	A global loader/spinner ensures smooth user experience while background tasks run.
-	•	Color-coded circular buttons for quick access to each functionality.
+---
+
+## Key Features
+
+### 1. Data Fetching
+- Fetch historical data from **multiple sources**, including **Binance** and **Yahoo Finance (yfinance)**.
+- Specify your desired cryptocurrency symbol (e.g., `BTCUSDT`, `ETHUSDT`, `BTC-USD`, etc.).
+
+### 2. Technical Analysis
+- Add popular technical indicators such as **SMA, EMA, RSI, MACD, Bollinger Bands**, and more.
+- Easily view the indicator data and incorporate it into **backtesting** or predictions.
+
+### 3. Price Prediction
+- Predict next-day closing prices using an **ensemble of machine learning models**.
+- Leverage advanced architectures, including **LSTM, XGBoost**, and **ensemble stacking** for more accurate forecasts.
+
+### 4. Backtesting
+- Run backtests on **built-in or custom trading strategies**.
+- View performance metrics such as:
+  - **Sharpe Ratio**
+  - **Max Drawdown**
+  - **Cumulative Returns**
+
+### 5. Risk Management
+- Get **support/resistance levels**, dynamic **stop-loss/take-profit** calculations, **ATR (Average True Range)**, and recommended **position sizing**.
+- Monitor your **risk-to-reward ratios** for more informed decision-making.
+
+### 6. Report Generation
+- Generate **comprehensive reports with visualizations**, including:
+  - **Fibonacci retracement**
+  - **Candlestick charts**
+  - **Risk analysis overlays**
+- Export these reports in **interactive HTML format** for easy sharing.
+
+### 7. User-Friendly UI
+- A **dynamic table** logs each action (e.g., Fetch Data, Predict, Backtest) with timestamps, details, and optional embedded charts.
+- A **global loader/spinner** ensures a smooth user experience while background tasks run.
+- **Color-coded circular buttons** for quick access to each functionality.
 
 ## Installation
 
