@@ -59,8 +59,6 @@ Screenshots:
 ![image](https://github.com/user-attachments/assets/ebc176cb-7f64-4866-98e4-f23ee876bacc)
 ![image](https://github.com/user-attachments/assets/99c1da58-9f8d-4258-b7ce-d942a2fa5b77)
 ![image](https://github.com/user-attachments/assets/8407bdcc-c676-430e-89bf-15bebae84560)
-![image](https://github.com/user-attachments/assets/a9b5dcb6-0590-4c44-a313-53b027b65724)
-![image](https://github.com/user-attachments/assets/cea79300-5ee5-4ca6-820b-f221ff3fc6c9)
 ![image](https://github.com/user-attachments/assets/09be8b8b-2b31-4f00-8598-a12b934f68bf)
 ![newplot (1)](https://github.com/user-attachments/assets/e3481427-b62c-4289-88b1-902b75312ca6)
 
